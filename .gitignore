@@ -1,0 +1,18 @@
+.env
+venv/
+.idea/
+*.pyc
+=======
+/venv/
+account_posts/api/__pycache__/views.cpython-310.pyc
+/.env
+/db.sqlite3
+/staticfiles/
+
+# Ignore test failures log files
+**/test_failures_log.txt
+**/test_cases_log.txt
+media/
+/celerybeat-schedule.bak
+/celerybeat-schedule.dir
+/db2.sqlite3
