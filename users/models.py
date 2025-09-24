@@ -56,6 +56,13 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
+    # Investor profile data
+    cnic = models.CharField(max_length=150, null=True, blank=True)
+    phone_number = models.CharField(max_length=150, null=True, blank=True)
+    address = models.CharField(max_length=150, null=True, blank=True)
+    first_name = models.CharField(max_length=150, null=True, blank=True)
+    last_name = models.CharField(max_length=150, null=True, blank=True)
+
     objects = UserManager()
 
     class Meta:
