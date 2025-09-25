@@ -74,11 +74,11 @@ class CarSerializer(serializers.ModelSerializer):
             {
                 "investor": inv.investor.id,
                 "investor_email": inv.investor.email,
-                "initial_amount": str(inv.amount),
-                "total_contribution": str(inv.total_contribution),
-                "investment_share": str(inv.investment_share),
-                "profit_amount": str(inv.profit_amount),
-                "total_return": str(inv.total_return),
+                "initial_amount": f"{inv.amount:.2f}",
+                "total_contribution": f"{inv.total_contribution:.2f}",
+                "investment_share": f"{inv.investment_share:.2f}",
+                "profit_amount": f"{inv.profit_amount:.2f}",
+                "total_return": f"{inv.total_return:.2f}",
             }
             for inv in obj.investments.all()
         ]
@@ -89,7 +89,7 @@ class CarSerializer(serializers.ModelSerializer):
                 "id": exp.id,
                 "investor": exp.investor.id,
                 "investor_email": exp.investor.email,
-                "amount": str(exp.amount),
+                "amount": f"{exp.amount:.2f}",
                 "description": exp.description,
                 "created": exp.created,
             }

@@ -68,29 +68,34 @@ class Car(TimeStampedModel):
     @property
     def total_invested(self):
         """Sum of all investments on this car."""
-        return sum(inv.amount for inv in self.investments.all())
+        total = sum(inv.amount for inv in self.investments.all())
+        return round(total, 2)
 
     @property
     def total_expenses(self):
         """Sum of all expenses on this car."""
-        return sum(exp.amount for exp in self.expenses.all())
+        total = sum(exp.amount for exp in self.expenses.all())
+        return round(total, 2)
 
     @property
     def total_invested_with_expenses(self):
         """Sum of all investments and expenses on this car."""
-        return self.total_invested + self.total_expenses
+        total = self.total_invested + self.total_expenses
+        return round(total, 2)
 
     @property
     def remaining_amount(self):
         """Remaining amount not yet invested."""
-        return self.total_amount - self.total_invested
+        remaining = self.total_amount - self.total_invested
+        return round(remaining, 2)
 
     @property
     def profit(self):
         """Calculate profit if car is sold (based on original car amount, not including expenses)"""
         if self.sold_amount:
-            return self.sold_amount - self.total_amount
-        return Decimal('0')
+            profit = self.sold_amount - self.total_amount
+            return round(profit, 2)
+        return Decimal('0.00')
 
     def calculate_profit_distribution(self):
         """
@@ -99,25 +104,25 @@ class Car(TimeStampedModel):
         """
         if not self.sold_amount:
             return {
-                "admin_share": Decimal('0'), 
+                "admin_share": Decimal('0.00'), 
                 "investor_shares": {},
-                "total_profit": Decimal('0'),
-                "remaining_profit": Decimal('0'),
+                "total_profit": Decimal('0.00'),
+                "remaining_profit": Decimal('0.00'),
                 "error": "Car has not been sold yet"
             }
         
         if self.profit <= 0:
             return {
-                "admin_share": Decimal('0'), 
+                "admin_share": Decimal('0.00'), 
                 "investor_shares": {},
-                "total_profit": self.profit,
-                "remaining_profit": Decimal('0'),
+                "total_profit": round(self.profit, 2),
+                "remaining_profit": Decimal('0.00'),
                 "error": f"No profit to distribute. Loss: {abs(self.profit)}"
             }
 
         # Step 1: Calculate admin share
-        admin_share = (self.admin_percentage / Decimal('100')) * self.profit
-        remaining_profit = self.profit - admin_share
+        admin_share = round((self.admin_percentage / Decimal('100')) * self.profit, 2)
+        remaining_profit = round(self.profit - admin_share, 2)
 
         # Step 2: Calculate investor shares based on contribution percentage
         investor_shares = {}
@@ -125,18 +130,23 @@ class Car(TimeStampedModel):
 
         for investment in self.investments.all():
             investor_contribution = investment.total_contribution
-            contribution_percentage = investor_contribution / total_contribution if total_contribution > 0 else 0
-            investor_profit = remaining_profit * contribution_percentage
+            if total_contribution > 0:
+                contribution_percentage = investor_contribution / total_contribution
+                investor_profit = round(remaining_profit * contribution_percentage, 2)
+            else:
+                contribution_percentage = 0
+                investor_profit = Decimal('0.00')
+                
             investor_shares[investment.investor.email] = {
-                'contribution': investor_contribution,
-                'percentage': contribution_percentage * 100,
+                'contribution': round(investor_contribution, 2),
+                'percentage': round(contribution_percentage * 100, 2),
                 'profit': investor_profit
             }
 
         return {
             "admin_share": admin_share,
             "investor_shares": investor_shares,
-            "total_profit": self.profit,
+            "total_profit": round(self.profit, 2),
             "remaining_profit": remaining_profit
         }
 
@@ -170,13 +180,16 @@ class CarInvestment(TimeStampedModel):
     def investment_share(self):
         """Investor's share % in the car based on total contribution"""
         total_invested = self.car.total_invested_with_expenses
-        return (self.total_contribution / total_invested) * 100 if total_invested else 0
+        if total_invested > 0:
+            share = (self.total_contribution / total_invested) * 100
+            return round(share, 2)
+        return Decimal('0.00')
 
     @property
     def profit_amount(self):
         """Calculate actual profit amount this investor will receive"""
         if not self.car.sold_amount or self.car.profit <= 0:
-            return Decimal('0')
+            return Decimal('0.00')
         
         # Admin takes their percentage first
         admin_share = (self.car.admin_percentage / Decimal('100')) * self.car.profit
@@ -184,13 +197,17 @@ class CarInvestment(TimeStampedModel):
         
         # Investor gets their share of remaining profit
         total_contribution = self.car.total_invested_with_expenses
-        contribution_percentage = self.total_contribution / total_contribution if total_contribution > 0 else 0
-        return remaining_profit * contribution_percentage
+        if total_contribution > 0:
+            contribution_percentage = self.total_contribution / total_contribution
+            profit = remaining_profit * contribution_percentage
+            return round(profit, 2)
+        return Decimal('0.00')
 
     @property
     def total_return(self):
         """Total amount investor will get back (original investment + expenses + profit)"""
-        return self.total_contribution + self.profit_amount
+        total = self.total_contribution + self.profit_amount
+        return round(total, 2)
 
 
 class CarExpense(TimeStampedModel):
