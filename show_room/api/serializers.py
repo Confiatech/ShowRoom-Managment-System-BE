@@ -32,6 +32,8 @@ class CarSerializer(serializers.ModelSerializer):
     # For response
     all_investments = serializers.SerializerMethodField(read_only=True)
     all_expenses = serializers.SerializerMethodField(read_only=True)
+    expense_summary = serializers.SerializerMethodField(read_only=True)
+    expense_analytics = serializers.SerializerMethodField(read_only=True)
     total_invested = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
     total_expenses = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
     total_invested_with_expenses = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
@@ -48,7 +50,7 @@ class CarSerializer(serializers.ModelSerializer):
             "total_amount", "sold_amount", "admin_percentage",
             "total_invested", "total_expenses", "total_invested_with_expenses", 
             "remaining_amount", "profit",
-            "investments", "all_investments", "all_expenses", "profit_distribution",
+            "investments", "all_investments", "all_expenses", "expense_summary", "expense_analytics", "profit_distribution",
         ]
 
     def create(self, validated_data):
@@ -89,12 +91,96 @@ class CarSerializer(serializers.ModelSerializer):
                 "id": exp.id,
                 "investor": exp.investor.id,
                 "investor_email": exp.investor.email,
+                "investor_name": f"{exp.investor.first_name} {exp.investor.last_name}".strip() or exp.investor.email,
                 "amount": f"{exp.amount:.2f}",
                 "description": exp.description,
                 "created": exp.created,
+                "created_date": exp.created.strftime("%Y-%m-%d"),
+                "created_time": exp.created.strftime("%H:%M:%S"),
             }
             for exp in obj.expenses.all()
         ]
+
+    def get_expense_summary(self, obj):
+        """Get expense summary grouped by investor"""
+        from collections import defaultdict
+        
+        expense_by_investor = defaultdict(lambda: {
+            'investor_id': None,
+            'investor_email': '',
+            'investor_name': '',
+            'total_expenses': 0,
+            'expense_count': 0,
+            'expenses': []
+        })
+        
+        for expense in obj.expenses.all():
+            investor_email = expense.investor.email
+            investor_name = f"{expense.investor.first_name} {expense.investor.last_name}".strip() or expense.investor.email
+            
+            expense_by_investor[investor_email]['investor_id'] = expense.investor.id
+            expense_by_investor[investor_email]['investor_email'] = investor_email
+            expense_by_investor[investor_email]['investor_name'] = investor_name
+            expense_by_investor[investor_email]['total_expenses'] += float(expense.amount)
+            expense_by_investor[investor_email]['expense_count'] += 1
+            expense_by_investor[investor_email]['expenses'].append({
+                'id': expense.id,
+                'amount': f"{expense.amount:.2f}",
+                'description': expense.description,
+                'date': expense.created.strftime("%Y-%m-%d %H:%M:%S")
+            })
+        
+        # Format the final result
+        result = []
+        for investor_data in expense_by_investor.values():
+            investor_data['total_expenses'] = f"{investor_data['total_expenses']:.2f}"
+            result.append(investor_data)
+        
+        return result
+
+    def get_expense_analytics(self, obj):
+        """Get expense analytics and trends"""
+        expenses = obj.expenses.all().order_by('-created')
+        
+        if not expenses:
+            return {
+                'total_expenses': "0.00",
+                'expense_count': 0,
+                'average_expense': "0.00",
+                'latest_expense': None,
+                'highest_expense': None,
+                'expense_percentage_of_investment': "0.00"
+            }
+        
+        total_expenses = sum(exp.amount for exp in expenses)
+        expense_count = len(expenses)
+        average_expense = total_expenses / expense_count if expense_count > 0 else 0
+        latest_expense = expenses[0]
+        highest_expense = max(expenses, key=lambda x: x.amount)
+        
+        # Calculate expense as percentage of total investment
+        expense_percentage = (total_expenses / obj.total_invested * 100) if obj.total_invested > 0 else 0
+        
+        return {
+            'total_expenses': f"{total_expenses:.2f}",
+            'expense_count': expense_count,
+            'average_expense': f"{average_expense:.2f}",
+            'latest_expense': {
+                'id': latest_expense.id,
+                'amount': f"{latest_expense.amount:.2f}",
+                'description': latest_expense.description,
+                'investor_email': latest_expense.investor.email,
+                'date': latest_expense.created.strftime("%Y-%m-%d %H:%M:%S")
+            },
+            'highest_expense': {
+                'id': highest_expense.id,
+                'amount': f"{highest_expense.amount:.2f}",
+                'description': highest_expense.description,
+                'investor_email': highest_expense.investor.email,
+                'date': highest_expense.created.strftime("%Y-%m-%d %H:%M:%S")
+            },
+            'expense_percentage_of_investment': f"{expense_percentage:.2f}"
+        }
 
     def get_profit_distribution(self, obj):
         """Get profit distribution if car is sold"""

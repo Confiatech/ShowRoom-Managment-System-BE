@@ -97,6 +97,33 @@ class Car(TimeStampedModel):
             return round(profit, 2)
         return Decimal('0.00')
 
+    def get_expense_statistics(self):
+        """Get detailed expense statistics"""
+        from collections import defaultdict
+        
+        stats = {
+            'total_expenses': self.total_expenses,
+            'expense_count': self.expenses.count(),
+            'by_investor': defaultdict(lambda: {'total': Decimal('0.00'), 'count': 0, 'expenses': []})
+        }
+        
+        for expense in self.expenses.all():
+            investor_email = expense.investor.email
+            stats['by_investor'][investor_email]['total'] += expense.amount
+            stats['by_investor'][investor_email]['count'] += 1
+            stats['by_investor'][investor_email]['expenses'].append({
+                'id': expense.id,
+                'amount': expense.amount,
+                'description': expense.description,
+                'date': expense.created
+            })
+        
+        # Round totals
+        for investor_data in stats['by_investor'].values():
+            investor_data['total'] = round(investor_data['total'], 2)
+        
+        return stats
+
     def calculate_profit_distribution(self):
         """
         Calculate profit distribution among admin and investors
