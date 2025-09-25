@@ -2,13 +2,25 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from show_room.models import Car, CarExpense
-from .serializers import CarSerializer, CarExpenseSerializer
+from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer
 
 
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all().prefetch_related("investments__investor", "expenses__investor")
-    serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        """Return different serializers for list and detail views"""
+        if self.action == 'list':
+            return CarListSerializer
+        return CarDetailSerializer
+
+    def get_queryset(self):
+        """Optimize queryset based on action"""
+        if self.action == 'list':
+            # For list view, we don't need expenses data
+            return Car.objects.all().prefetch_related("investments__investor")
+        return Car.objects.all().prefetch_related("investments__investor", "expenses__investor")
 
     @action(detail=True, methods=['post'])
     def add_expense(self, request, pk=None):

@@ -25,7 +25,29 @@ class CarExpenseSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class CarSerializer(serializers.ModelSerializer):
+class CarListSerializer(serializers.ModelSerializer):
+    """Serializer for car list view (home page) - minimal details"""
+    total_invested = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    remaining_amount = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    investor_count = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = Car
+        fields = [
+            "id",
+            "brand", "model_name", "car_number", "year", "color",
+            "fuel_type", "transmission", "status",
+            "total_amount", "total_invested", "remaining_amount",
+            "investor_count"
+        ]
+    
+    def get_investor_count(self, obj):
+        """Get number of investors for this car"""
+        return obj.investments.count()
+
+
+class CarDetailSerializer(serializers.ModelSerializer):
+    """Serializer for car detail view - complete details"""
     # For creating
     investments = CarInvestmentCreateSerializer(many=True, write_only=True, required=False)
 
@@ -188,3 +210,6 @@ class CarSerializer(serializers.ModelSerializer):
             return obj.calculate_profit_distribution()
         return None
 
+
+# Backward compatibility - keep the original name
+CarSerializer = CarDetailSerializer
