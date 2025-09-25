@@ -31,3 +31,79 @@ class IsSuperAdmin(BasePermission):
             request.user.is_authenticated and 
             request.user.is_superuser
         )
+
+
+class CarPermission(BasePermission):
+    """
+    Custom permission for car operations:
+    - Superusers: Full CRUD access to all cars
+    - Regular users: Read-only access to cars they have invested in
+    """
+
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Superusers have full access
+        if request.user.is_superuser:
+            return True
+        
+        # Regular users can only read
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        
+        # No write permissions for regular users
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Superusers have full access
+        if request.user.is_superuser:
+            return True
+        
+        # Regular users can only read cars they have invested in
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return obj.investments.filter(investor=request.user).exists()
+        
+        # No write permissions for regular users
+        return False
+
+
+class ExpensePermission(BasePermission):
+    """
+    Custom permission for expense operations:
+    - Only superusers can create, update, delete expenses
+    - Regular users can only read expenses for cars they invested in
+    """
+
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Superusers have full access
+        if request.user.is_superuser:
+            return True
+        
+        # Regular users can only read
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        
+        # No write permissions for regular users
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Superusers have full access
+        if request.user.is_superuser:
+            return True
+        
+        # Regular users can only read expenses for cars they invested in
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return obj.car.investments.filter(investor=request.user).exists()
+        
+        # No write permissions for regular users
+        return False

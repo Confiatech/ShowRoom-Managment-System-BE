@@ -43,7 +43,14 @@ class CarListSerializer(serializers.ModelSerializer):
     
     def get_investor_count(self, obj):
         """Get number of investors for this car"""
-        return obj.investments.count()
+        user = self.context['request'].user if 'request' in self.context else None
+        
+        if user and user.is_superuser:
+            # Superusers see total investor count
+            return obj.investments.count()
+        else:
+            # Regular users just see if they are invested (1 or 0)
+            return 1 if obj.investments.filter(investor=user).exists() else 0
 
 
 class CarDetailSerializer(serializers.ModelSerializer):
@@ -94,6 +101,17 @@ class CarDetailSerializer(serializers.ModelSerializer):
         return car
 
     def get_all_investments(self, obj):
+        user = self.context['request'].user if 'request' in self.context else None
+        
+        if user and user.is_superuser:
+            # Superusers see all investments
+            investments = obj.investments.all()
+        elif user:
+            # Regular users only see their own investment
+            investments = obj.investments.filter(investor=user)
+        else:
+            investments = []
+        
         return [
             {
                 "investor": inv.investor.id,
@@ -104,10 +122,22 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 "profit_amount": f"{inv.profit_amount:.2f}",
                 "total_return": f"{inv.total_return:.2f}",
             }
-            for inv in obj.investments.all()
+            for inv in investments
         ]
 
     def get_all_expenses(self, obj):
+        user = self.context['request'].user if 'request' in self.context else None
+        
+        if user and user.is_superuser:
+            # Superusers see all expenses
+            expenses = obj.expenses.all()
+        elif user:
+            # Regular users see all expenses for cars they invested in
+            # (since they can only access cars they invested in anyway)
+            expenses = obj.expenses.all()
+        else:
+            expenses = []
+        
         return [
             {
                 "id": exp.id,
@@ -120,12 +150,23 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 "created_date": exp.created.strftime("%Y-%m-%d"),
                 "created_time": exp.created.strftime("%H:%M:%S"),
             }
-            for exp in obj.expenses.all()
+            for exp in expenses
         ]
 
     def get_expense_summary(self, obj):
         """Get expense summary grouped by investor"""
         from collections import defaultdict
+        
+        user = self.context['request'].user if 'request' in self.context else None
+        
+        if user and user.is_superuser:
+            # Superusers see all expenses
+            expenses = obj.expenses.all()
+        elif user:
+            # Regular users see all expenses for cars they invested in
+            expenses = obj.expenses.all()
+        else:
+            expenses = []
         
         expense_by_investor = defaultdict(lambda: {
             'investor_id': None,
@@ -136,7 +177,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
             'expenses': []
         })
         
-        for expense in obj.expenses.all():
+        for expense in expenses:
             investor_email = expense.investor.email
             investor_name = f"{expense.investor.first_name} {expense.investor.last_name}".strip() or expense.investor.email
             
@@ -162,7 +203,16 @@ class CarDetailSerializer(serializers.ModelSerializer):
 
     def get_expense_analytics(self, obj):
         """Get expense analytics and trends"""
-        expenses = obj.expenses.all().order_by('-created')
+        user = self.context['request'].user if 'request' in self.context else None
+        
+        if user and user.is_superuser:
+            # Superusers see all expenses
+            expenses = obj.expenses.all().order_by('-created')
+        elif user:
+            # Regular users see all expenses for cars they invested in
+            expenses = obj.expenses.all().order_by('-created')
+        else:
+            expenses = []
         
         if not expenses:
             return {
