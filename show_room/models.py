@@ -1,10 +1,11 @@
 from django.db import models
 
 # Create your models here.
+from decimal import Decimal
 
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
-
+from django.conf import settings
 
 class Car(TimeStampedModel):
     """
@@ -40,7 +41,8 @@ class Car(TimeStampedModel):
     mileage = models.PositiveIntegerField(null=True, blank=True, help_text="Mileage in KM")
 
     # Financials
-    total_amount = models.DecimalField(max_digits=30, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=80, decimal_places=2)
+    sold_amount = models.DecimalField(max_digits=80, decimal_places=2, null=True, blank=True)
     admin_percentage = models.DecimalField(
         max_digits=10, decimal_places=2,
         help_text="Admin commission percentage"
@@ -73,4 +75,36 @@ class Car(TimeStampedModel):
         """Remaining amount not yet invested."""
         return self.total_amount - self.total_invested
 
+
+class CarInvestment(TimeStampedModel):
+    """
+    Relationship between Car and Investor
+    """
+    car = models.ForeignKey(
+        Car, related_name="investments", on_delete=models.CASCADE
+    )
+    investor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="car_investments", on_delete=models.CASCADE
+    )
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+
+    class Meta:
+        unique_together = ('car', 'investor')  # one investor per car
+
+    def __str__(self):
+        return f"{self.investor.email} invested {self.amount} in {self.car.model_name}"
+
+    @property
+    def percentage_share(self):
+        """Investor's share % in the car"""
+        return (self.amount / self.car.total_amount) * 100 if self.car.total_amount else 0
+
+    @property
+    def profit_share(self):
+        """
+        Profit share after deducting admin percentage.
+        Example: If admin takes 10%, remaining 90% is split by investors.
+        """
+        remaining_percentage = Decimal(100) - self.car.admin_percentage
+        return (Decimal(self.percentage_share) / Decimal(100)) * remaining_percentage
 
