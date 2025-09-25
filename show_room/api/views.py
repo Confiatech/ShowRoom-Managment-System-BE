@@ -1,10 +1,14 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q
+from rest_framework.views import APIView
+from django.db.models import Q, Count
+from django.contrib.auth import get_user_model
 from show_room.models import Car, CarExpense
 from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer
-from auths.api.permissions import CarPermission, ExpensePermission
+from auths.api.permissions import CarPermission, ExpensePermission, IsSuperAdmin
+
+User = get_user_model()
 
 
 class CarViewSet(viewsets.ModelViewSet):
@@ -96,3 +100,98 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only superusers can create expenses")
         serializer.save()
+
+
+class DashboardStatsAPIView(APIView):
+    """
+    Dashboard statistics API - Admin only access
+    Provides overview statistics for the admin dashboard
+    """
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+        """Get dashboard statistics"""
+        try:
+            # Car statistics
+            total_cars = Car.objects.count()
+            sold_cars = Car.objects.filter(status='sold').count()
+            available_cars = Car.objects.filter(status='available').count()
+            
+            # User statistics
+            total_users = User.objects.count()
+            total_investors = User.objects.filter(role='investor').count()
+            total_admins = User.objects.filter(role='admin').count()
+            
+            # Investment statistics
+            from show_room.models import CarInvestment
+            total_investments = CarInvestment.objects.count()
+            total_invested_amount = sum(inv.amount for inv in CarInvestment.objects.all())
+            
+            # Expense statistics
+            total_expenses = CarExpense.objects.count()
+            total_expense_amount = sum(exp.amount for exp in CarExpense.objects.all())
+            
+            # Profit statistics (for sold cars)
+            sold_cars_queryset = Car.objects.filter(status='sold', sold_amount__isnull=False)
+            total_profit = sum(car.profit for car in sold_cars_queryset)
+            
+            # Recent activity
+            recent_cars = Car.objects.order_by('-created')[:5]
+            recent_expenses = CarExpense.objects.order_by('-created')[:5]
+            
+            # Prepare response data
+            stats = {
+                "overview": {
+                    "total_cars": total_cars,
+                    "sold_cars": sold_cars,
+                    "available_cars": available_cars,
+                    "total_users": total_users,
+                    "total_investors": total_investors,
+                    "total_admins": total_admins
+                },
+                "financial": {
+                    "total_investments": total_investments,
+                    "total_invested_amount": f"{total_invested_amount:.2f}",
+                    "total_expenses": total_expenses,
+                    "total_expense_amount": f"{total_expense_amount:.2f}",
+                    "total_profit": f"{total_profit:.2f}",
+                    "average_car_value": f"{(total_invested_amount / total_cars):.2f}" if total_cars > 0 else "0.00"
+                },
+                "recent_activity": {
+                    "recent_cars": [
+                        {
+                            "id": car.id,
+                            "brand": car.brand,
+                            "model_name": car.model_name,
+                            "car_number": car.car_number,
+                            "status": car.status,
+                            "total_amount": f"{car.total_amount:.2f}",
+                            "created": car.created.strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        for car in recent_cars
+                    ],
+                    "recent_expenses": [
+                        {
+                            "id": exp.id,
+                            "car_number": exp.car.car_number,
+                            "investor_email": exp.investor.email,
+                            "amount": f"{exp.amount:.2f}",
+                            "description": exp.description,
+                            "created": exp.created.strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        for exp in recent_expenses
+                    ]
+                },
+                "car_status_breakdown": {
+                    "available": available_cars,
+                    "sold": sold_cars
+                }
+            }
+            
+            return Response(stats, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to fetch dashboard statistics: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
