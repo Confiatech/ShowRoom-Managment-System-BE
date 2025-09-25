@@ -69,6 +69,45 @@ class CarViewSet(viewsets.ModelViewSet):
         distribution = car.calculate_profit_distribution()
         return Response(distribution)
 
+    @action(detail=True, methods=['get'])
+    def investors(self, request, pk=None):
+        """Get all investor details for a specific car"""
+        car = self.get_object()
+        user = request.user
+        
+        # Get investments for this car
+        investments = car.investments.all().select_related('investor')
+        
+        if not investments.exists():
+            return Response(
+                {"message": "No investors found for this car"}, 
+                status=status.HTTP_200_OK
+            )
+        
+        # Prepare investor details
+        investors_data = []
+        
+        for investment in investments:
+            investor = investment.investor
+            
+            # Basic investor information
+            investor_info = {
+                "investor_id": investor.id,
+                "email": investor.email,
+                "first_name": investor.first_name or "",
+                "last_name": investor.last_name or "",
+                "full_name": f"{investor.first_name or ''} {investor.last_name or ''}".strip() or investor.email,
+
+            }
+
+            investors_data.append(investor_info)
+
+        response_data = {
+            "investors": investors_data
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+
 
 class CarExpenseViewSet(viewsets.ModelViewSet):
     serializer_class = CarExpenseSerializer
