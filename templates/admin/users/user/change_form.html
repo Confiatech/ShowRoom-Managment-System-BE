@@ -1,0 +1,151 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Enhanced styling for user form */
+    .form-row {
+        margin-bottom: 20px;
+    }
+    
+    .form-row .field-box {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .form-row label {
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-row input[type="text"], 
+    .form-row input[type="email"], 
+    .form-row select, 
+    .form-row textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+        width: 100%;
+    }
+    
+    .form-row input:focus, 
+    .form-row select:focus, 
+    .form-row textarea:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .fieldset {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+    }
+    
+    .fieldset h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .fieldset .description {
+        background: #f8fafc;
+        padding: 12px 20px;
+        color: #718096;
+        font-size: 13px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .fieldset .form-row {
+        padding: 0 20px;
+    }
+    
+    .fieldset .form-row:last-child {
+        padding-bottom: 20px;
+    }
+    
+    /* Checkbox styling */
+    input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #667eea;
+    }
+    
+    /* Submit button styling */
+    .submit-row {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 25px;
+    }
+    
+    .submit-row input[type="submit"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .submit-row input[type="submit"]:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Breadcrumbs styling */
+    .breadcrumbs {
+        background: #f8fafc;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+    
+    .breadcrumbs a {
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}
+{% if original %}
+<h1 style="color: #2d3748; font-size: 28px; font-weight: 300; margin-bottom: 10px;">
+    👤 Edit User: {{ original.email }}
+</h1>
+<p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+    Update user information, permissions, and account settings.
+</p>
+{% else %}
+<h1 style="color: #2d3748; font-size: 28px; font-weight: 300; margin-bottom: 10px;">
+    ➕ Add New User
+</h1>
+<p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+    Create a new user account with the required information.
+</p>
+{% endif %}
+{% endblock %}

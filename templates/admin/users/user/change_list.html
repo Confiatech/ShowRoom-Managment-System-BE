@@ -1,0 +1,212 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Enhanced styling for user admin */
+    .results table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .results th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+        padding: 12px 8px;
+        text-align: left;
+        border: none;
+    }
+    
+    .results td {
+        padding: 15px 10px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        min-height: 60px;
+    }
+    
+    .results tr:hover {
+        background-color: #f8fafc;
+        transform: scale(1.001);
+        transition: all 0.2s ease;
+    }
+    
+    .results tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Alternating row colors with better contrast */
+    .results tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    
+    .results tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+    
+    .results tr:nth-child(even):hover {
+        background-color: #e2e8f0;
+    }
+    
+    .results tr:nth-child(odd):hover {
+        background-color: #f1f5f9;
+    }
+    
+    /* Action column styling */
+    .action-checkbox-column {
+        width: 40px;
+        text-align: center;
+    }
+    
+    /* Search box styling */
+    .changelist-search input[type="text"] {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+    }
+    
+    .changelist-search input[type="text"]:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Filter sidebar styling */
+    #changelist-filter {
+        background: #f8fafc;
+        border-left: 1px solid #e2e8f0;
+        border-radius: 8px 0 0 8px;
+    }
+    
+    #changelist-filter h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0;
+        padding: 12px 15px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    #changelist-filter h3 {
+        color: #4a5568;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 15px 15px 8px 15px;
+    }
+    
+    #changelist-filter ul {
+        margin: 0 15px 15px 15px;
+    }
+    
+    #changelist-filter li {
+        padding: 4px 0;
+    }
+    
+    #changelist-filter a {
+        color: #4a5568;
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.2s ease;
+    }
+    
+    #changelist-filter a:hover {
+        color: #667eea;
+    }
+    
+    #changelist-filter a.selected {
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    /* Pagination styling */
+    .paginator {
+        margin: 20px 0;
+    }
+    
+    .paginator a, .paginator .this-page {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 2px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+    
+    .paginator a {
+        background: #f8fafc;
+        color: #4a5568;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .paginator a:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .paginator .this-page {
+        background: #667eea;
+        color: white;
+        border: 1px solid #667eea;
+        font-weight: 600;
+    }
+    
+    /* Additional improvements for better visibility */
+    .results tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .results tbody tr:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    
+    /* Improve column widths for better layout */
+    .results th:first-child,
+    .results td:first-child {
+        width: 25%;
+    }
+    
+    .results th:nth-child(2),
+    .results td:nth-child(2) {
+        width: 10%;
+    }
+    
+    .results th:nth-child(3),
+    .results td:nth-child(3) {
+        width: 15%;
+    }
+    
+    .results th:nth-child(4),
+    .results td:nth-child(4) {
+        width: 20%;
+    }
+    
+    .results th:nth-child(5),
+    .results td:nth-child(5) {
+        width: 15%;
+    }
+    
+    .results th:nth-child(6),
+    .results td:nth-child(6) {
+        width: 15%;
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}
+<h1 style="color: #2d3748; font-size: 28px; font-weight: 300; margin-bottom: 10px;">
+    👥 User Management
+</h1>
+<p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+    Manage investor accounts, view financial activity, and track user engagement.
+</p>
+{% endblock %}
