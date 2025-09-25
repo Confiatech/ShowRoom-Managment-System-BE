@@ -6,3 +6,623 @@ INFO 2025-09-25 08:00:40,564 autoreload 102824 134984063835008 Watching for file
 INFO 2025-09-25 08:00:50,742 autoreload 102824 134984063835008 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
 INFO 2025-09-25 08:02:10,231 autoreload 102996 138203753925504 Watching for file changes with StatReloader
 INFO 2025-09-25 08:02:19,009 autoreload 103029 133821959641984 Watching for file changes with StatReloader
+INFO 2025-09-25 08:07:01,753 autoreload 103579 136536733440896 Watching for file changes with StatReloader
+INFO 2025-09-25 08:07:06,019 autoreload 103612 135764925332352 Watching for file changes with StatReloader
+INFO 2025-09-25 08:07:37,979 autoreload 103579 136536733440896 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:07:37,997 autoreload 103612 135764925332352 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:07:38,629 autoreload 103636 137161701559168 Watching for file changes with StatReloader
+INFO 2025-09-25 08:07:38,643 autoreload 103638 140215239027584 Watching for file changes with StatReloader
+ERROR 2025-09-25 08:07:52,653 exception 103636 137161603016384 Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+WARNING 2025-09-25 08:07:52,798 log 103636 137161603016384 Bad Request: /api/users/
+WARNING 2025-09-25 08:07:52,798 basehttp 103636 137161603016384 "GET /api/users/ HTTP/1.1" 400 81441
+ERROR 2025-09-25 08:08:17,228 exception 103636 137161603016384 Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+WARNING 2025-09-25 08:08:17,383 log 103636 137161603016384 Bad Request: /api/users/
+WARNING 2025-09-25 08:08:17,383 basehttp 103636 137161603016384 "GET /api/users/ HTTP/1.1" 400 81441
+ERROR 2025-09-25 08:09:31,819 exception 103636 137161603016384 Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.18.125:8000'. You may need to add '192.168.18.125' to ALLOWED_HOSTS.
+WARNING 2025-09-25 08:09:31,915 log 103636 137161603016384 Bad Request: /api/users/
+WARNING 2025-09-25 08:09:31,916 basehttp 103636 137161603016384 "GET /api/users/ HTTP/1.1" 400 81441
+INFO 2025-09-25 08:10:08,623 autoreload 103751 139134633769856 Watching for file changes with StatReloader
+ERROR 2025-09-25 08:10:12,240 log 103751 139134536509120 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:10:12,265 basehttp 103751 139134536509120 "GET /api/users/ HTTP/1.1" 500 194862
+ERROR 2025-09-25 08:10:25,839 log 103751 139134536509120 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:10:25,842 basehttp 103751 139134536509120 "GET /api/users/ HTTP/1.1" 500 194862
+INFO 2025-09-25 08:10:31,994 autoreload 103791 127480648522624 Watching for file changes with StatReloader
+ERROR 2025-09-25 08:10:37,094 log 103791 127480551696064 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:10:37,107 basehttp 103791 127480551696064 "GET /api/users/ HTTP/1.1" 500 194862
+ERROR 2025-09-25 08:11:58,603 log 103791 127480551696064 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:11:58,605 basehttp 103791 127480551696064 "GET /api/users/ HTTP/1.1" 500 194862
+INFO 2025-09-25 08:12:01,589 autoreload 103862 137206270942080 Watching for file changes with StatReloader
+ERROR 2025-09-25 08:12:02,059 log 103862 137206173787840 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:12:02,080 basehttp 103862 137206173787840 "GET /api/users/ HTTP/1.1" 500 194869
+ERROR 2025-09-25 08:12:03,436 log 103862 137206173787840 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:12:03,438 basehttp 103862 137206173787840 "GET /api/users/ HTTP/1.1" 500 194869
+ERROR 2025-09-25 08:12:04,588 log 103862 137206173787840 Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 420, in initial
+    self.perform_authentication(request)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/views.py", line 330, in perform_authentication
+    request.user
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 232, in user
+    self._authenticate()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework/request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/rest_framework_simplejwt/authentication.py", line 130, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 316, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 577, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/expressions.py", line 1305, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 568, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/.venv/lib/python3.11/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+ERROR 2025-09-25 08:12:04,590 basehttp 103862 137206173787840 "GET /api/users/ HTTP/1.1" 500 194869
+INFO 2025-09-25 08:12:56,549 autoreload 103638 140215239027584 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:12:56,563 autoreload 103862 137206270942080 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:12:57,424 autoreload 103935 126554478922624 Watching for file changes with StatReloader
+INFO 2025-09-25 08:12:57,446 autoreload 103934 131187549461376 Watching for file changes with StatReloader
+INFO 2025-09-25 08:13:05,399 autoreload 103935 126554478922624 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:13:05,421 autoreload 103934 131187549461376 /home/muhammad-ishaq/Documents/GitHub/ShowRoom-Managment-System-BE/config/settings/development.py changed, reloading.
+INFO 2025-09-25 08:13:06,647 autoreload 103954 125866671750016 Watching for file changes with StatReloader
+INFO 2025-09-25 08:13:06,708 autoreload 103958 134648489356160 Watching for file changes with StatReloader
+INFO 2025-09-25 08:13:12,739 autoreload 103999 133898856885120 Watching for file changes with StatReloader
+INFO 2025-09-25 08:13:18,118 basehttp 103999 133898760611520 "GET /api/users/ HTTP/1.1" 200 2733
