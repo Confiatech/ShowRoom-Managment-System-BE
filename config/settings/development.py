@@ -56,6 +56,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[
     'http://localhost:4200',
     'https://localhost:4200',
+    'https://localhost:4201',
+    'http://localhost:4201',
 ])
 
 CORS_ALLOW_HEADERS = [

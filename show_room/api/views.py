@@ -108,6 +108,148 @@ class CarViewSet(viewsets.ModelViewSet):
         
         return Response(response_data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post', 'patch'], permission_classes=[IsSuperAdmin])
+    def manage_investments(self, request, pk=None):
+        """Add or update investments for a specific car (superuser only)"""
+        car = self.get_object()
+        
+        if request.method == 'POST':
+            # Add new investments
+            investments_data = request.data.get('investments', [])
+            
+            if not investments_data:
+                return Response(
+                    {"error": "No investments data provided"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate total investments
+            total_new_investments = sum(float(inv.get('amount', 0)) for inv in investments_data)
+            current_total_invested = car.total_invested
+            
+            if (current_total_invested + total_new_investments) > car.total_amount:
+                return Response(
+                    {"error": f"Total investments ({current_total_invested + total_new_investments}) would exceed car total amount ({car.total_amount})"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create or update investments
+            created_investments = []
+            for inv_data in investments_data:
+                try:
+                    investor_id = inv_data.get('investor')
+                    amount = float(inv_data.get('amount', 0))
+                    
+                    if not investor_id or amount <= 0:
+                        continue
+                    
+                    # Check if investor exists
+                    try:
+                        investor = User.objects.get(id=investor_id)
+                    except User.DoesNotExist:
+                        return Response(
+                            {"error": f"Investor with ID {investor_id} does not exist"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Create or update investment
+                    from show_room.models import CarInvestment
+                    investment, created = CarInvestment.objects.get_or_create(
+                        car=car,
+                        investor=investor,
+                        defaults={'amount': amount}
+                    )
+                    
+                    if not created:
+                        # Update existing investment
+                        investment.amount += amount  # Add to existing amount
+                        investment.save()
+                    
+                    created_investments.append({
+                        'investor_id': investor.id,
+                        'investor_email': investor.email,
+                        'amount': float(investment.amount),
+                        'created': created
+                    })
+                    
+                except Exception as e:
+                    return Response(
+                        {"error": f"Error processing investment: {str(e)}"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            return Response({
+                'message': f'Successfully processed {len(created_investments)} investments',
+                'investments': created_investments,
+                'car_total_invested': float(car.total_invested)
+            }, status=status.HTTP_201_CREATED)
+        
+        elif request.method == 'PATCH':
+            # Update existing investments
+            investments_data = request.data.get('investments', [])
+            
+            if not investments_data:
+                return Response(
+                    {"error": "No investments data provided"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Calculate total of new investments
+            total_new_investments = sum(float(inv.get('amount', 0)) for inv in investments_data)
+            
+            if total_new_investments > car.total_amount:
+                return Response(
+                    {"error": f"Total investments ({total_new_investments}) cannot exceed car total amount ({car.total_amount})"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Clear existing investments and create new ones
+            car.investments.all().delete()
+            
+            updated_investments = []
+            for inv_data in investments_data:
+                try:
+                    investor_id = inv_data.get('investor')
+                    amount = float(inv_data.get('amount', 0))
+                    
+                    if not investor_id or amount <= 0:
+                        continue
+                    
+                    # Check if investor exists
+                    try:
+                        investor = User.objects.get(id=investor_id)
+                    except User.DoesNotExist:
+                        return Response(
+                            {"error": f"Investor with ID {investor_id} does not exist"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Create new investment
+                    from show_room.models import CarInvestment
+                    investment = CarInvestment.objects.create(
+                        car=car,
+                        investor=investor,
+                        amount=amount
+                    )
+                    
+                    updated_investments.append({
+                        'investor_id': investor.id,
+                        'investor_email': investor.email,
+                        'amount': float(investment.amount)
+                    })
+                    
+                except Exception as e:
+                    return Response(
+                        {"error": f"Error processing investment: {str(e)}"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            return Response({
+                'message': f'Successfully updated {len(updated_investments)} investments',
+                'investments': updated_investments,
+                'car_total_invested': float(car.total_invested)
+            }, status=status.HTTP_200_OK)
+
 
 class CarExpenseViewSet(viewsets.ModelViewSet):
     serializer_class = CarExpenseSerializer

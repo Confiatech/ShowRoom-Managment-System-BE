@@ -100,6 +100,52 @@ class CarDetailSerializer(serializers.ModelSerializer):
 
         return car
 
+    def update(self, instance, validated_data):
+        investments_data = validated_data.pop("investments", None)
+        
+        # Update car fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Handle investments if provided
+        if investments_data is not None:
+            # Get current investors
+            current_investors = set(instance.investments.values_list('investor_id', flat=True))
+            new_investors = set(inv['investor'].id if hasattr(inv['investor'], 'id') else inv['investor'] for inv in investments_data)
+            
+            # Calculate total investments
+            total_investments = sum(inv["amount"] for inv in investments_data)
+            
+            # Validate total amount
+            if total_investments > instance.total_amount:
+                raise serializers.ValidationError(
+                    f"Total investments ({total_investments}) cannot exceed car total amount ({instance.total_amount})."
+                )
+            
+            # Remove investors that are no longer in the list
+            investors_to_remove = current_investors - new_investors
+            if investors_to_remove:
+                instance.investments.filter(investor_id__in=investors_to_remove).delete()
+            
+            # Update or create investments
+            for inv_data in investments_data:
+                investor_id = inv_data['investor'].id if hasattr(inv_data['investor'], 'id') else inv_data['investor']
+                
+                # Use get_or_create to handle the unique constraint properly
+                investment, created = CarInvestment.objects.get_or_create(
+                    car=instance,
+                    investor_id=investor_id,
+                    defaults={'amount': inv_data['amount']}
+                )
+                
+                # If it already existed, update the amount
+                if not created:
+                    investment.amount = inv_data['amount']
+                    investment.save()
+        
+        return instance
+
     def get_all_investments(self, obj):
         user = self.context['request'].user if 'request' in self.context else None
         
