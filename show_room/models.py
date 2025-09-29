@@ -91,9 +91,11 @@ class Car(TimeStampedModel):
 
     @property
     def profit(self):
-        """Calculate profit if car is sold (based on original car amount, not including expenses)"""
+        """Calculate profit if car is sold (based on total cost basis: investment + expenses)"""
         if self.sold_amount:
-            profit = self.sold_amount - self.total_amount
+            # Total cost basis = original investment + all expenses
+            total_cost_basis = self.total_invested_with_expenses
+            profit = self.sold_amount - total_cost_basis
             return round(profit, 2)
         return Decimal('0.00')
 
@@ -127,7 +129,8 @@ class Car(TimeStampedModel):
     def calculate_profit_distribution(self):
         """
         Calculate profit distribution among admin and investors
-        Returns dict with admin_share and investor_shares
+        Logic: Admin takes percentage of total profit first, then remaining profit is distributed 
+        among investors based on their contribution percentage to total cost basis
         """
         if not self.sold_amount:
             return {
@@ -135,30 +138,36 @@ class Car(TimeStampedModel):
                 "investor_shares": {},
                 "total_profit": Decimal('0.00'),
                 "remaining_profit": Decimal('0.00'),
+                "total_cost_basis": round(self.total_invested_with_expenses, 2),
                 "error": "Car has not been sold yet"
             }
         
-        if self.profit <= 0:
+        total_cost_basis = self.total_invested_with_expenses
+        total_profit = round(self.profit, 2)
+        
+        if total_profit <= 0:
             return {
                 "admin_share": Decimal('0.00'), 
                 "investor_shares": {},
-                "total_profit": round(self.profit, 2),
+                "total_profit": total_profit,
                 "remaining_profit": Decimal('0.00'),
-                "error": f"No profit to distribute. Loss: {abs(self.profit)}"
+                "total_cost_basis": round(total_cost_basis, 2),
+                "error": f"No profit to distribute. Loss: {abs(total_profit)}"
             }
 
-        # Step 1: Calculate admin share
-        admin_share = round((self.admin_percentage / Decimal('100')) * self.profit, 2)
-        remaining_profit = round(self.profit - admin_share, 2)
+        # Step 1: Calculate admin share from total profit
+        admin_share = round((self.admin_percentage / Decimal('100')) * total_profit, 2)
+        remaining_profit = round(total_profit - admin_share, 2)
 
-        # Step 2: Calculate investor shares based on contribution percentage
+        # Step 2: Calculate investor shares based on their contribution percentage to total cost basis
+        # Each investor's share = (their_contribution / total_cost_basis) * remaining_profit
         investor_shares = {}
-        total_contribution = self.total_invested_with_expenses
 
         for investment in self.investments.all():
             investor_contribution = investment.total_contribution
-            if total_contribution > 0:
-                contribution_percentage = investor_contribution / total_contribution
+            if total_cost_basis > 0:
+                # Percentage based on contribution to total cost basis
+                contribution_percentage = investor_contribution / total_cost_basis
                 investor_profit = round(remaining_profit * contribution_percentage, 2)
             else:
                 contribution_percentage = 0
@@ -167,14 +176,17 @@ class Car(TimeStampedModel):
             investor_shares[investment.investor.email] = {
                 'contribution': round(investor_contribution, 2),
                 'percentage': round(contribution_percentage * 100, 2),
-                'profit': investor_profit
+                'profit': investor_profit,
+                'total_return': round(investor_contribution + investor_profit, 2)
             }
 
         return {
             "admin_share": admin_share,
             "investor_shares": investor_shares,
-            "total_profit": round(self.profit, 2),
-            "remaining_profit": remaining_profit
+            "total_profit": total_profit,
+            "remaining_profit": remaining_profit,
+            "total_cost_basis": round(total_cost_basis, 2),
+            "sold_amount": round(self.sold_amount, 2)
         }
 
 
@@ -218,14 +230,14 @@ class CarInvestment(TimeStampedModel):
         if not self.car.sold_amount or self.car.profit <= 0:
             return Decimal('0.00')
         
-        # Admin takes their percentage first
+        # Admin takes their percentage from total profit first
         admin_share = (self.car.admin_percentage / Decimal('100')) * self.car.profit
         remaining_profit = self.car.profit - admin_share
         
-        # Investor gets their share of remaining profit
-        total_contribution = self.car.total_invested_with_expenses
-        if total_contribution > 0:
-            contribution_percentage = self.total_contribution / total_contribution
+        # Investor gets their share of remaining profit based on contribution to total cost basis
+        total_cost_basis = self.car.total_invested_with_expenses
+        if total_cost_basis > 0:
+            contribution_percentage = self.total_contribution / total_cost_basis
             profit = remaining_profit * contribution_percentage
             return round(profit, 2)
         return Decimal('0.00')

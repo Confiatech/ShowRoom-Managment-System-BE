@@ -16,3 +16,4 @@ media/
 /celerybeat-schedule.bak
 /celerybeat-schedule.dir
 /db2.sqlite3
+.codex/settings/kiroCodex-settings.json
