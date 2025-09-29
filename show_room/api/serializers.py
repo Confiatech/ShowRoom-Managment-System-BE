@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from show_room.models import Car, CarInvestment, CarExpense
+from show_room.models import Car, CarInvestment, CarExpense, CarExpenseImage
 
 
 class CarInvestmentCreateSerializer(serializers.ModelSerializer):
@@ -10,19 +10,58 @@ class CarInvestmentCreateSerializer(serializers.ModelSerializer):
 
 
 
+class CarExpenseImageSerializer(serializers.ModelSerializer):
+    """Serializer for expense images"""
+    
+    class Meta:
+        model = CarExpenseImage
+        fields = ["id", "image", "description", "created"]
+        read_only_fields = ["created"]
+
+
 class CarExpenseSerializer(serializers.ModelSerializer):
     investor_email = serializers.CharField(source='investor.email', read_only=True)
+    images = CarExpenseImageSerializer(many=True, read_only=True)
+    image_count = serializers.SerializerMethodField(read_only=True)
+    image_files = serializers.ListField(
+        child=serializers.ImageField(),
+        write_only=True,
+        required=False,
+        help_text="List of image files to upload with the expense"
+    )
     
     class Meta:
         model = CarExpense
-        fields = ["id", "car", "investor", "investor_email", "amount", "description", "created"]
+        fields = ["id", "car", "investor", "investor_email", "amount", "description", "images", "image_count", "image_files", "created"]
         read_only_fields = ["created"]
 
+    def get_image_count(self, obj):
+        """Get number of images for this expense"""
+        try:
+            return obj.images.count()
+        except Exception:
+            return 0
+
     def create(self, validated_data):
+        # Extract image files from validated data
+        image_files = validated_data.pop('image_files', [])
+        
         # Set investor from request user if not provided
         if 'investor' not in validated_data:
             validated_data['investor'] = self.context['request'].user
-        return super().create(validated_data)
+        
+        # Create the expense
+        expense = super().create(validated_data)
+        
+        # Create images for the expense
+        for image_file in image_files:
+            CarExpenseImage.objects.create(
+                expense=expense,
+                image=image_file,
+                description=""  # Default empty description
+            )
+        
+        return expense
 
 
 class CarListSerializer(serializers.ModelSerializer):
@@ -192,6 +231,16 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 "investor_name": f"{exp.investor.first_name} {exp.investor.last_name}".strip() or exp.investor.email,
                 "amount": f"{exp.amount:.2f}",
                 "description": exp.description,
+                "images": [
+                    {
+                        "id": img.id,
+                        "image": img.image.url if img.image else None,
+                        "description": img.description,
+                        "created": img.created
+                    }
+                    for img in exp.images.all()
+                ],
+                "image_count": exp.images.count(),
                 "created": exp.created,
                 "created_date": exp.created.strftime("%Y-%m-%d"),
                 "created_time": exp.created.strftime("%H:%M:%S"),
@@ -236,6 +285,15 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 'id': expense.id,
                 'amount': f"{expense.amount:.2f}",
                 'description': expense.description,
+                'images': [
+                    {
+                        'id': img.id,
+                        'image': img.image.url if img.image else None,
+                        'description': img.description
+                    }
+                    for img in expense.images.all()
+                ],
+                'image_count': expense.images.count(),
                 'date': expense.created.strftime("%Y-%m-%d %H:%M:%S")
             })
         
@@ -288,6 +346,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 'amount': f"{latest_expense.amount:.2f}",
                 'description': latest_expense.description,
                 'investor_email': latest_expense.investor.email,
+                'image_count': latest_expense.images.count(),
                 'date': latest_expense.created.strftime("%Y-%m-%d %H:%M:%S")
             },
             'highest_expense': {
@@ -295,6 +354,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 'amount': f"{highest_expense.amount:.2f}",
                 'description': highest_expense.description,
                 'investor_email': highest_expense.investor.email,
+                'image_count': highest_expense.images.count(),
                 'date': highest_expense.created.strftime("%Y-%m-%d %H:%M:%S")
             },
             'expense_percentage_of_investment': f"{expense_percentage:.2f}"

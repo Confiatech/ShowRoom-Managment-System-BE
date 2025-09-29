@@ -38,14 +38,6 @@ elif 'LOCAL_DB' in env:
             'PORT': env('LOCAL_DB_PORT', default='5432'),
         }
     }
-else:
-    # Fallback to SQLite for development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
 
 # -----------------------------------------------------------------------------
 # CORS CONFIGURATION (More restrictive than local)

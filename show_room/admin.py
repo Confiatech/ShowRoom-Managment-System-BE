@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.db.models import Sum, Count
-from show_room.models import Car, CarInvestment, CarExpense
+from show_room.models import Car, CarInvestment, CarExpense, CarExpenseImage
 
 
 class CarInvestmentInline(admin.TabularInline):
@@ -17,15 +17,49 @@ class CarInvestmentInline(admin.TabularInline):
         return super().get_queryset(request).select_related('investor')
 
 
+class CarExpenseImageInline(admin.TabularInline):
+    """Inline for CarExpense images"""
+    model = CarExpenseImage
+    extra = 1
+    fields = ("image", "description", "image_preview")
+    readonly_fields = ("image_preview",)
+    
+    def image_preview(self, obj):
+        """Display image preview"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 100px; max-height: 100px;" />',
+                obj.image.url
+            )
+        return "No image"
+    image_preview.short_description = 'Preview'
+
+
 class CarExpenseInline(admin.TabularInline):
     """Enhanced inline for CarExpenses with better display"""
     model = CarExpense
     extra = 0
-    fields = ("investor", "amount", "description", "created")
-    readonly_fields = ("created",)
+    fields = ("investor", "amount", "description", "image_count", "created")
+    readonly_fields = ("image_count", "created")
+    
+    def image_count(self, obj):
+        """Display number of images for this expense"""
+        if obj.pk:
+            try:
+                count = obj.images.count()
+                if count > 0:
+                    return format_html(
+                        '<span style="color: #28a745; font-weight: bold;">{} image{}</span>',
+                        count, 's' if count != 1 else ''
+                    )
+                return format_html('<span style="color: #6c757d;">No images</span>')
+            except Exception:
+                return format_html('<span style="color: #dc3545;">Error loading images</span>')
+        return "New expense"
+    image_count.short_description = 'Images'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('investor').order_by('-created')
+        return super().get_queryset(request).select_related('investor').prefetch_related('images').order_by('-created')
 
 
 @admin.register(Car)
@@ -234,11 +268,11 @@ class CarInvestmentAdmin(admin.ModelAdmin):
 
 @admin.register(CarExpense)
 class CarExpenseAdmin(admin.ModelAdmin):
-    """Enhanced CarExpense admin"""
+    """Enhanced CarExpense admin with image support"""
     
     list_display = (
         "expense_info", "car_link", "investor_info", 
-        "description_short", "date_added"
+        "description_short", "image_count", "date_added"
     )
     list_filter = ("created", "car__status", "car__brand")
     search_fields = ("car__model_name", "car__car_number", "investor__email", "description")
@@ -256,6 +290,7 @@ class CarExpenseAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ("created", "modified")
+    inlines = [CarExpenseImageInline]
     
     def expense_info(self, obj):
         """Display expense amount with styling"""
@@ -294,7 +329,68 @@ class CarExpenseAdmin(admin.ModelAdmin):
         return obj.description
     description_short.short_description = 'Description'
     
+    def image_count(self, obj):
+        """Display number of images"""
+        try:
+            count = obj.images.count()
+            if count > 0:
+                return format_html(
+                    '<span style="color: #28a745; font-weight: bold;">{} image{}</span>',
+                    count, 's' if count != 1 else ''
+                )
+            return format_html('<span style="color: #6c757d;">No images</span>')
+        except Exception:
+            return format_html('<span style="color: #dc3545;">Error loading images</span>')
+    image_count.short_description = 'Images'
+    
     def date_added(self, obj):
         """Display formatted date"""
         return obj.created.strftime('%Y-%m-%d %H:%M')
     date_added.short_description = 'Date Added'
+
+
+@admin.register(CarExpenseImage)
+class CarExpenseImageAdmin(admin.ModelAdmin):
+    """Admin for CarExpense images"""
+    
+    list_display = ("image_preview", "expense_info", "description", "created")
+    list_filter = ("created", "expense__car__brand")
+    search_fields = ("expense__car__model_name", "expense__car__car_number", "description")
+    ordering = ("-created",)
+    
+    fieldsets = (
+        ('Image Details', {
+            'fields': (('expense', 'image'), 'description')
+        }),
+        ('Preview', {
+            'fields': ('image_preview',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ("image_preview", "created", "modified")
+    
+    def image_preview(self, obj):
+        """Display image preview"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />',
+                obj.image.url
+            )
+        return "No image"
+    image_preview.short_description = 'Image Preview'
+    
+    def expense_info(self, obj):
+        """Display expense information"""
+        return format_html(
+            '<strong>${}</strong> - {}<br>'
+            '<small style="color: #666;">{}</small>',
+            f"{obj.expense.amount:,.2f}",
+            obj.expense.car.model_name,
+            obj.expense.car.car_number
+        )
+    expense_info.short_description = 'Expense Details'

@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Count
 from django.contrib.auth import get_user_model
-from show_room.models import Car, CarExpense
-from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer
+from show_room.models import Car, CarExpense, CarExpenseImage
+from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer, CarExpenseImageSerializer
 from auths.api.permissions import CarPermission, ExpensePermission, IsSuperAdmin
 
 User = get_user_model()
@@ -36,7 +36,11 @@ class CarViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             # For list view, we don't need expenses data
             return base_queryset.prefetch_related("investments__investor")
-        return base_queryset.prefetch_related("investments__investor", "expenses__investor")
+        return base_queryset.prefetch_related(
+            "investments__investor", 
+            "expenses__investor", 
+            "expenses__images"
+        )
 
     @action(detail=True, methods=['post'], permission_classes=[ExpensePermission])
     def add_expense(self, request, pk=None):
@@ -261,12 +265,12 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
         
         if user.is_superuser:
             # Superusers see all expenses
-            queryset = CarExpense.objects.all().select_related("car", "investor")
+            queryset = CarExpense.objects.all().select_related("car", "investor").prefetch_related("images")
         else:
             # Regular users only see expenses for cars they invested in
             queryset = CarExpense.objects.filter(
                 car__investments__investor=user
-            ).select_related("car", "investor").distinct()
+            ).select_related("car", "investor").prefetch_related("images").distinct()
         
         # Filter by car_id if provided
         car_id = self.request.query_params.get('car_id')
@@ -281,6 +285,150 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only superusers can create expenses")
         serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        """Override create to handle image files and return complete expense data"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Check permissions
+        if not request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only superusers can create expenses")
+        
+        # Create the expense with images
+        expense = serializer.save()
+        
+        # Return the complete expense data with images
+        response_serializer = self.get_serializer(expense)
+        headers = self.get_success_headers(response_serializer.data)
+        
+        return Response(
+            response_serializer.data, 
+            status=status.HTTP_201_CREATED, 
+            headers=headers
+        )
+
+    @action(detail=True, methods=['post'], permission_classes=[IsSuperAdmin])
+    def add_images(self, request, pk=None):
+        """Add images to an existing expense"""
+        expense = self.get_object()
+        
+        # Handle multiple image uploads
+        images = request.FILES.getlist('images')
+        descriptions = request.data.getlist('descriptions', [])
+        
+        if not images:
+            return Response(
+                {"error": "No images provided"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        created_images = []
+        for i, image in enumerate(images):
+            description = descriptions[i] if i < len(descriptions) else ""
+            
+            image_obj = CarExpenseImage.objects.create(
+                expense=expense,
+                image=image,
+                description=description
+            )
+            
+            created_images.append({
+                'id': image_obj.id,
+                'image': image_obj.image.url,
+                'description': image_obj.description,
+                'created': image_obj.created
+            })
+        
+        return Response({
+            'message': f'Successfully added {len(created_images)} images to expense',
+            'images': created_images,
+            'expense_id': expense.id
+        }, status=status.HTTP_201_CREATED)
+
+
+class CarExpenseImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing expense images"""
+    serializer_class = CarExpenseImageSerializer
+    permission_classes = [ExpensePermission]
+
+    def get_queryset(self):
+        """Filter images based on user role and expense access"""
+        user = self.request.user
+        
+        if user.is_superuser:
+            # Superusers see all expense images
+            queryset = CarExpenseImage.objects.all().select_related("expense__car", "expense__investor")
+        else:
+            # Regular users only see images for expenses of cars they invested in
+            queryset = CarExpenseImage.objects.filter(
+                expense__car__investments__investor=user
+            ).select_related("expense__car", "expense__investor").distinct()
+        
+        # Filter by expense_id if provided
+        expense_id = self.request.query_params.get('expense_id')
+        if expense_id:
+            queryset = queryset.filter(expense_id=expense_id)
+        
+        return queryset
+
+    def perform_create(self, serializer):
+        """Only superusers can create expense images"""
+        if not self.request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only superusers can create expense images")
+        serializer.save()
+
+    @action(detail=False, methods=['post'], permission_classes=[IsSuperAdmin])
+    def bulk_upload(self, request):
+        """Bulk upload images for an expense"""
+        expense_id = request.data.get('expense_id')
+        if not expense_id:
+            return Response(
+                {"error": "expense_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            expense = CarExpense.objects.get(id=expense_id)
+        except CarExpense.DoesNotExist:
+            return Response(
+                {"error": "Expense not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Handle multiple image uploads
+        images = request.FILES.getlist('images')
+        descriptions = request.data.getlist('descriptions', [])
+        
+        if not images:
+            return Response(
+                {"error": "No images provided"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        created_images = []
+        for i, image in enumerate(images):
+            description = descriptions[i] if i < len(descriptions) else ""
+            
+            image_obj = CarExpenseImage.objects.create(
+                expense=expense,
+                image=image,
+                description=description
+            )
+            
+            created_images.append({
+                'id': image_obj.id,
+                'image': image_obj.image.url,
+                'description': image_obj.description,
+                'created': image_obj.created
+            })
+        
+        return Response({
+            'message': f'Successfully uploaded {len(created_images)} images',
+            'images': created_images
+        }, status=status.HTTP_201_CREATED)
 
 
 class DashboardStatsAPIView(APIView):
@@ -318,7 +466,7 @@ class DashboardStatsAPIView(APIView):
             
             # Recent activity
             recent_cars = Car.objects.order_by('-created')[:5]
-            recent_expenses = CarExpense.objects.order_by('-created')[:5]
+            recent_expenses = CarExpense.objects.select_related('car', 'investor').prefetch_related('images').order_by('-created')[:5]
             
             # Prepare response data
             stats = {
@@ -358,6 +506,7 @@ class DashboardStatsAPIView(APIView):
                             "investor_email": exp.investor.email,
                             "amount": f"{exp.amount:.2f}",
                             "description": exp.description,
+                            "image_count": exp.images.count(),
                             "created": exp.created.strftime("%Y-%m-%d %H:%M:%S")
                         }
                         for exp in recent_expenses

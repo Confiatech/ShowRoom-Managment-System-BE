@@ -15,12 +15,30 @@ ALLOWED_HOSTS = ['*']
 # -----------------------------------------------------------------------------
 # DATABASE CONFIGURATION (Local Development)
 # -----------------------------------------------------------------------------
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if 'RDS_DB_NAME' in env:
+    # AWS RDS or cloud database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': env("RDS_DB_NAME"),
+            'USER': env("RDS_DB_USER"),
+            'PASSWORD': env("RDS_DB_PASSWORD"),
+            'HOST': env("RDS_DB_HOST", default=env("HOST", default="localhost")),
+            'PORT': env("RDS_DB_PORT", default=env("PORT", default='5432')),
+        }
     }
-}
+elif 'LOCAL_DB' in env:
+    # Local PostgreSQL development DB
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': env("LOCAL_DB_NAME"),
+            'USER': env("LOCAL_DB_USER", default="postgres"),
+            'PASSWORD': env("LOCAL_DB_PASSWORD"),
+            'HOST': env('LOCAL_DB_HOST', default='localhost'),
+            'PORT': env('LOCAL_DB_PORT', default='5432'),
+        }
+    }
 
 # If you prefer PostgreSQL for local development, uncomment below:
 # DATABASES = {

@@ -268,3 +268,27 @@ class CarExpense(TimeStampedModel):
     def __str__(self):
         return f"{self.investor.email} - {self.amount} expense for {self.car.model_name}"
 
+
+class CarExpenseImage(TimeStampedModel):
+    """
+    Images for car expenses - multiple images per expense
+    """
+    expense = models.ForeignKey(
+        CarExpense, related_name="images", on_delete=models.CASCADE
+    )
+    image = models.ImageField(
+        upload_to='expense_images/',
+        help_text="Upload expense receipt or related image"
+    )
+    description = models.CharField(
+        max_length=255, 
+        blank=True, 
+        help_text="Optional description for the image"
+    )
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return f"Image for expense {self.expense.id} - {self.expense.car.model_name}"
+
