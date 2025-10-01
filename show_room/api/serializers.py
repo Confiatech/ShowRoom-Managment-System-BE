@@ -12,11 +12,20 @@ class CarInvestmentCreateSerializer(serializers.ModelSerializer):
 
 class CarExpenseImageSerializer(serializers.ModelSerializer):
     """Serializer for expense images"""
+    image = serializers.SerializerMethodField()
     
     class Meta:
         model = CarExpenseImage
         fields = ["id", "image", "description", "created"]
         read_only_fields = ["created"]
+    
+    def get_image(self, obj):
+        """Return complete URL for image"""
+        if obj.image and 'request' in self.context:
+            return self.context['request'].build_absolute_uri(obj.image.url)
+        elif obj.image:
+            return obj.image.url
+        return None
 
 
 class CarExpenseSerializer(serializers.ModelSerializer):
@@ -234,7 +243,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 "images": [
                     {
                         "id": img.id,
-                        "image": img.image.url if img.image else None,
+                        "image": self.context['request'].build_absolute_uri(img.image.url) if img.image and 'request' in self.context else img.image.url if img.image else None,
                         "description": img.description,
                         "created": img.created
                     }
@@ -288,7 +297,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 'images': [
                     {
                         'id': img.id,
-                        'image': img.image.url if img.image else None,
+                        'image': self.context['request'].build_absolute_uri(img.image.url) if img.image and 'request' in self.context else img.image.url if img.image else None,
                         'description': img.description
                     }
                     for img in expense.images.all()

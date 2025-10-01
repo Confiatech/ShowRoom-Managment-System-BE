@@ -336,7 +336,7 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
             
             created_images.append({
                 'id': image_obj.id,
-                'image': image_obj.image.url,
+                'image': request.build_absolute_uri(image_obj.image.url),
                 'description': image_obj.description,
                 'created': image_obj.created
             })
@@ -420,7 +420,7 @@ class CarExpenseImageViewSet(viewsets.ModelViewSet):
             
             created_images.append({
                 'id': image_obj.id,
-                'image': image_obj.image.url,
+                'image': request.build_absolute_uri(image_obj.image.url),
                 'description': image_obj.description,
                 'created': image_obj.created
             })
