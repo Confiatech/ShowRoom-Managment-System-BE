@@ -105,7 +105,7 @@ class CarListSerializer(serializers.ModelSerializer):
             "brand", "model_name", "car_number", "year", "color",
             "fuel_type", "transmission", "status",
             "total_amount", "total_invested", "remaining_amount",
-            "investor_count"
+            "investor_count","asking_price"
         ]
     
     def get_investor_count(self, obj):
@@ -145,7 +145,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
             "engine_capacity", "fuel_type", "transmission", "mileage", "status",
             "total_amount", "sold_amount", "admin_percentage",
             "total_invested", "total_expenses", "total_invested_with_expenses", 
-            "remaining_amount", "profit",
+            "remaining_amount", "profit",'asking_price',
             "investments", "all_investments", "all_expenses", "expense_summary", "expense_analytics", "profit_distribution",
         ]
 

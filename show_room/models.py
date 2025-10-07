@@ -16,7 +16,7 @@ class Car(TimeStampedModel):
     model_name = models.CharField(max_length=150)    # e.g. Civic, Corolla
     car_number = models.CharField(max_length=100, null=True)  # Registration / Plate number
     year = models.PositiveIntegerField(null=True, blank=True)   # Manufacturing year
-    
+    asking_price = models.PositiveIntegerField(null=True, blank=True) 
     # Show room owner who added this car
     show_room_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
