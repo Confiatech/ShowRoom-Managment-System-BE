@@ -67,7 +67,7 @@ class CarAdmin(admin.ModelAdmin):
     """Enhanced Car admin with better organization and visual improvements"""
     
     list_display = (
-        "car_info", "status_badge", "financial_summary", 
+        "car_info", "status_badge", "financial_summary", "show_room_owner",
         "investment_progress", "profit_status", "view_actions"
     )
     list_filter = ("status", "fuel_type", "transmission", "brand", "year")

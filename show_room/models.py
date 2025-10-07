@@ -9,13 +9,23 @@ from django.conf import settings
 
 class Car(TimeStampedModel):
     """
-    Car details added by Admin
+    Car details added by Admin or Show Room Owner
     """
     # Basic Information
     brand = models.CharField(max_length=150)         # e.g. Toyota, Honda, BMW
     model_name = models.CharField(max_length=150)    # e.g. Civic, Corolla
-    car_number = models.CharField(max_length=100, unique=True)  # Registration / Plate number
+    car_number = models.CharField(max_length=100, null=True)  # Registration / Plate number
     year = models.PositiveIntegerField(null=True, blank=True)   # Manufacturing year
+    
+    # Show room owner who added this car
+    show_room_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='owned_cars',
+        help_text="Show room owner who manages this car"
+    )
 
     # Specs
     color = models.CharField(max_length=50, null=True, blank=True)

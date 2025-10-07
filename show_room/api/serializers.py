@@ -59,6 +59,25 @@ class CarExpenseSerializer(serializers.ModelSerializer):
         if 'investor' not in validated_data:
             validated_data['investor'] = self.context['request'].user
         
+        # Ensure investor exists in CarInvestment for this car
+        if 'investor' in validated_data and 'car' in validated_data:
+            car = validated_data['car']
+            investor = validated_data['investor']
+            
+            # Check if investor already has investment in this car
+            investment_exists = CarInvestment.objects.filter(
+                car=car, 
+                investor=investor
+            ).exists()
+            
+            # If no investment exists, create one with 0 amount
+            if not investment_exists:
+                CarInvestment.objects.create(
+                    car=car,
+                    investor=investor,
+                    amount=0.0
+                )
+        
         # Create the expense
         expense = super().create(validated_data)
         
@@ -132,6 +151,12 @@ class CarDetailSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         investments_data = validated_data.pop("investments", [])
+        
+        # Set show room owner if user is a show room owner
+        user = self.context['request'].user
+        if user.role == 'show_room_owner':
+            validated_data['show_room_owner'] = user
+        
         car = Car.objects.create(**validated_data)
 
         total_investments = sum(inv["amount"] for inv in investments_data)
@@ -197,8 +222,11 @@ class CarDetailSerializer(serializers.ModelSerializer):
     def get_all_investments(self, obj):
         user = self.context['request'].user if 'request' in self.context else None
         
-        if user and user.is_superuser:
-            # Superusers see all investments
+        if user and (user.is_superuser or user.role == 'admin'):
+            # Superusers and admins see all investments
+            investments = obj.investments.all()
+        elif user and user.role == 'show_room_owner' and obj.show_room_owner == user:
+            # Show room owners see investments for their cars
             investments = obj.investments.all()
         elif user:
             # Regular users only see their own investment
@@ -222,8 +250,11 @@ class CarDetailSerializer(serializers.ModelSerializer):
     def get_all_expenses(self, obj):
         user = self.context['request'].user if 'request' in self.context else None
         
-        if user and user.is_superuser:
-            # Superusers see all expenses
+        if user and (user.is_superuser or user.role == 'admin'):
+            # Superusers and admins see all expenses
+            expenses = obj.expenses.all()
+        elif user and user.role == 'show_room_owner' and obj.show_room_owner == user:
+            # Show room owners see expenses for their cars
             expenses = obj.expenses.all()
         elif user:
             # Regular users see all expenses for cars they invested in
@@ -263,8 +294,11 @@ class CarDetailSerializer(serializers.ModelSerializer):
         
         user = self.context['request'].user if 'request' in self.context else None
         
-        if user and user.is_superuser:
-            # Superusers see all expenses
+        if user and (user.is_superuser or user.role == 'admin'):
+            # Superusers and admins see all expenses
+            expenses = obj.expenses.all()
+        elif user and user.role == 'show_room_owner' and obj.show_room_owner == user:
+            # Show room owners see expenses for their cars
             expenses = obj.expenses.all()
         elif user:
             # Regular users see all expenses for cars they invested in
@@ -318,8 +352,11 @@ class CarDetailSerializer(serializers.ModelSerializer):
         """Get expense analytics and trends"""
         user = self.context['request'].user if 'request' in self.context else None
         
-        if user and user.is_superuser:
-            # Superusers see all expenses
+        if user and (user.is_superuser or user.role == 'admin'):
+            # Superusers and admins see all expenses
+            expenses = obj.expenses.all().order_by('-created')
+        elif user and user.role == 'show_room_owner' and obj.show_room_owner == user:
+            # Show room owners see expenses for their cars
             expenses = obj.expenses.all().order_by('-created')
         elif user:
             # Regular users see all expenses for cars they invested in

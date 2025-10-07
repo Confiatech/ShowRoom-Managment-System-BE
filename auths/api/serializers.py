@@ -56,7 +56,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'cnic',
             'phone_number',
             'address',
-            'role'
+            'role',
+            'show_room_owner'
         ]
 
     def validate_email(self, value):
@@ -113,6 +114,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'phone_number',
             'address',
             'role',
+            'show_room_owner',
             'is_active'
         ]
 
@@ -144,10 +146,36 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserPasswordResetSerializer(serializers.Serializer):
+    """
+    Serializer for password reset by show room owner.
+    Only requires new password, no old password needed.
+    """
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        min_length=8,
+        style={'input_type': 'password'},
+        help_text="New password for the user (minimum 8 characters)"
+    )
+
+    def validate_new_password(self, value):
+        """
+        Validate the new password.
+        """
+        try:
+            validate_password(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+        return value
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for user data in responses.
     """
+    show_room_owner_email = serializers.CharField(source='show_room_owner.email', read_only=True)
+    
     class Meta:
         model = User
         fields = [
@@ -159,9 +187,13 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number',
             'address',
             'cnic',
+            'show_room_owner',
+            'show_room_owner_email',
             'is_active',
             'date_joined',
-            'last_login'
+            'last_login',
+            'image',
+            'show_room_name',
         ]
-        read_only_fields = ['id', 'date_joined', 'last_login']
+        read_only_fields = ['id', 'date_joined', 'last_login', 'show_room_owner_email']
 

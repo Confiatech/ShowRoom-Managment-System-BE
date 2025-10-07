@@ -41,7 +41,7 @@ class UserAdmin(BaseUserAdmin):
     """Enhanced User admin with better organization and visual display"""
     
     list_display = (
-        'user_info', 'role_badge', 'contact_info', 'investment_summary', 
+        'user_info', 'role_badge', 'contact_info', 'show_room_owner','investment_summary', 
         'activity_status', 'join_date'
     )
     list_filter = ('role', 'is_active', 'is_staff', 'date_joined')
@@ -55,7 +55,10 @@ class UserAdmin(BaseUserAdmin):
             'description': 'Basic user identification and role information.'
         }),
         ('Contact Information', {
-            'fields': (('phone_number', 'cnic'), 'address'),
+            'fields': (('phone_number', 'cnic',
+            'image',
+            'show_room_name',
+            ), 'address'),
             'classes': ('collapse',)
         }),
         ('Account Status', {

@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Count
 from django.contrib.auth import get_user_model
-from show_room.models import Car, CarExpense, CarExpenseImage
+from show_room.models import Car, CarExpense, CarExpenseImage, CarInvestment
 from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer, CarExpenseImageSerializer
-from auths.api.permissions import CarPermission, ExpensePermission, IsSuperAdmin
+from auths.api.permissions import CarPermission, ExpensePermission, IsSuperAdmin, IsAdminOrShowRoomOwner
 
 User = get_user_model()
 
@@ -24,9 +24,12 @@ class CarViewSet(viewsets.ModelViewSet):
         """Filter queryset based on user role and optimize based on action"""
         user = self.request.user
         
-        if user.is_superuser:
-            # Superusers see all cars
+        if user.is_superuser or user.role == 'admin':
+            # Superusers and admins see all cars
             base_queryset = Car.objects.all()
+        elif user.role == 'show_room_owner':
+            # Show room owners see only their own cars
+            base_queryset = Car.objects.filter(show_room_owner=user)
         else:
             # Regular users only see cars they have invested in
             base_queryset = Car.objects.filter(
@@ -44,10 +47,11 @@ class CarViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[ExpensePermission])
     def add_expense(self, request, pk=None):
-        """Add expense to a specific car (superuser only)"""
-        if not request.user.is_superuser:
+        """Add expense to a specific car (admin/show room owner only)"""
+        user = request.user
+        if not (user.is_superuser or user.role in ['admin', 'show_room_owner']):
             return Response(
-                {"error": "Only superusers can add expenses"}, 
+                {"error": "Only admins and show room owners can add expenses"}, 
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -112,7 +116,7 @@ class CarViewSet(viewsets.ModelViewSet):
         
         return Response(response_data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post', 'patch'], permission_classes=[IsSuperAdmin])
+    @action(detail=True, methods=['post', 'patch'], permission_classes=[IsAdminOrShowRoomOwner])
     def manage_investments(self, request, pk=None):
         """Add or update investments for a specific car (superuser only)"""
         car = self.get_object()
@@ -263,9 +267,14 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
         """Filter expenses based on user role"""
         user = self.request.user
         
-        if user.is_superuser:
-            # Superusers see all expenses
+        if user.is_superuser or user.role == 'admin':
+            # Superusers and admins see all expenses
             queryset = CarExpense.objects.all().select_related("car", "investor").prefetch_related("images")
+        elif user.role == 'show_room_owner':
+            # Show room owners see expenses for their cars only
+            queryset = CarExpense.objects.filter(
+                car__show_room_owner=user
+            ).select_related("car", "investor").prefetch_related("images")
         else:
             # Regular users only see expenses for cars they invested in
             queryset = CarExpense.objects.filter(
@@ -280,10 +289,11 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """Only superusers can create expenses"""
-        if not self.request.user.is_superuser:
+        """Only admins and show room owners can create expenses"""
+        user = self.request.user
+        if not (user.is_superuser or user.role in ['admin', 'show_room_owner']):
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only superusers can create expenses")
+            raise PermissionDenied("Only admins and show room owners can create expenses")
         serializer.save()
 
     def create(self, request, *args, **kwargs):
@@ -292,9 +302,10 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         # Check permissions
-        if not request.user.is_superuser:
+        user = request.user
+        if not (user.is_superuser or user.role in ['admin', 'show_room_owner']):
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only superusers can create expenses")
+            raise PermissionDenied("Only admins and show room owners can create expenses")
         
         # Create the expense with images
         expense = serializer.save()
@@ -309,7 +320,7 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
             headers=headers
         )
 
-    @action(detail=True, methods=['post'], permission_classes=[IsSuperAdmin])
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
     def add_images(self, request, pk=None):
         """Add images to an existing expense"""
         expense = self.get_object()
@@ -357,9 +368,14 @@ class CarExpenseImageViewSet(viewsets.ModelViewSet):
         """Filter images based on user role and expense access"""
         user = self.request.user
         
-        if user.is_superuser:
-            # Superusers see all expense images
+        if user.is_superuser or user.role == 'admin':
+            # Superusers and admins see all expense images
             queryset = CarExpenseImage.objects.all().select_related("expense__car", "expense__investor")
+        elif user.role == 'show_room_owner':
+            # Show room owners see images for expenses of their cars
+            queryset = CarExpenseImage.objects.filter(
+                expense__car__show_room_owner=user
+            ).select_related("expense__car", "expense__investor")
         else:
             # Regular users only see images for expenses of cars they invested in
             queryset = CarExpenseImage.objects.filter(
@@ -374,13 +390,14 @@ class CarExpenseImageViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """Only superusers can create expense images"""
-        if not self.request.user.is_superuser:
+        """Only admins and show room owners can create expense images"""
+        user = self.request.user
+        if not (user.is_superuser or user.role in ['admin', 'show_room_owner']):
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only superusers can create expense images")
+            raise PermissionDenied("Only admins and show room owners can create expense images")
         serializer.save()
 
-    @action(detail=False, methods=['post'], permission_classes=[IsSuperAdmin])
+    @action(detail=False, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
     def bulk_upload(self, request):
         """Bulk upload images for an expense"""
         expense_id = request.data.get('expense_id')
@@ -433,40 +450,62 @@ class CarExpenseImageViewSet(viewsets.ModelViewSet):
 
 class DashboardStatsAPIView(APIView):
     """
-    Dashboard statistics API - Admin only access
-    Provides overview statistics for the admin dashboard
+    Dashboard statistics API - Admin and Show Room Owner access
+    Provides overview statistics for the dashboard
     """
-    permission_classes = [IsSuperAdmin]
+    permission_classes = [IsAdminOrShowRoomOwner]
 
     def get(self, request):
         """Get dashboard statistics"""
         try:
+            user = request.user
+            
+            # Filter data based on user role
+            if user.is_superuser or user.role == 'admin':
+                # Superusers and admins see all data
+                cars_queryset = Car.objects.all()
+                expenses_queryset = CarExpense.objects.all()
+                investments_queryset = CarInvestment.objects.all()
+                users_queryset = User.objects.all()
+            elif user.role == 'show_room_owner':
+                # Show room owners see only their data
+                cars_queryset = Car.objects.filter(show_room_owner=user)
+                expenses_queryset = CarExpense.objects.filter(car__show_room_owner=user)
+                investments_queryset = CarInvestment.objects.filter(car__show_room_owner=user)
+                users_queryset = user.get_accessible_users()
+            else:
+                # Regular users have no access (handled by permission)
+                cars_queryset = Car.objects.none()
+                expenses_queryset = CarExpense.objects.none()
+                investments_queryset = CarInvestment.objects.none()
+                users_queryset = User.objects.none()
+            
             # Car statistics
-            total_cars = Car.objects.count()
-            sold_cars = Car.objects.filter(status='sold').count()
-            available_cars = Car.objects.filter(status='available').count()
+            total_cars = cars_queryset.count()
+            sold_cars = cars_queryset.filter(status='sold').count()
+            available_cars = cars_queryset.filter(status='available').count()
             
             # User statistics
-            total_users = User.objects.count()
-            total_investors = User.objects.filter(role='investor').count()
-            total_admins = User.objects.filter(role='admin').count()
+            total_users = users_queryset.exclude(id=user.id).count()
+            total_investors = users_queryset.filter(role='investor').count()
+            total_show_room_owners = users_queryset.filter(role='show_room_owner').count()
+            total_admins = users_queryset.filter(role='admin').count()
             
             # Investment statistics
-            from show_room.models import CarInvestment
-            total_investments = CarInvestment.objects.count()
-            total_invested_amount = sum(inv.amount for inv in CarInvestment.objects.all())
+            total_investments = investments_queryset.count()
+            total_invested_amount = sum(inv.amount for inv in investments_queryset)
             
             # Expense statistics
-            total_expenses = CarExpense.objects.count()
-            total_expense_amount = sum(exp.amount for exp in CarExpense.objects.all())
+            total_expenses = expenses_queryset.count()
+            total_expense_amount = sum(exp.amount for exp in expenses_queryset)
             
             # Profit statistics (for sold cars)
-            sold_cars_queryset = Car.objects.filter(status='sold', sold_amount__isnull=False)
+            sold_cars_queryset = cars_queryset.filter(status='sold', sold_amount__isnull=False)
             total_profit = sum(car.profit for car in sold_cars_queryset)
             
             # Recent activity
-            recent_cars = Car.objects.order_by('-created')[:5]
-            recent_expenses = CarExpense.objects.select_related('car', 'investor').prefetch_related('images').order_by('-created')[:5]
+            recent_cars = cars_queryset.order_by('-created')[:5]
+            recent_expenses = expenses_queryset.select_related('car', 'investor').prefetch_related('images').order_by('-created')[:5]
             
             # Prepare response data
             stats = {
@@ -476,7 +515,10 @@ class DashboardStatsAPIView(APIView):
                     "available_cars": available_cars,
                     "total_users": total_users,
                     "total_investors": total_investors,
-                    "total_admins": total_admins
+                    "total_show_room_owners": total_show_room_owners,
+                    "total_admins": total_admins,
+                    "user_role": user.role,
+                    "is_superuser": user.is_superuser
                 },
                 "financial": {
                     "total_investments": total_investments,
@@ -521,6 +563,7 @@ class DashboardStatsAPIView(APIView):
             return Response(stats, status=status.HTTP_200_OK)
             
         except Exception as e:
+            print(e)
             return Response(
                 {"error": f"Failed to fetch dashboard statistics: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
