@@ -586,15 +586,8 @@ class ConsignmentCarExpenseSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CarExpense
-        fields = ["id", "car", "amount", "description", "images", "image_files", "created"]
-        read_only_fields = ["created"]
-    
-    def validate(self, attrs):
-        """Validate that this is for a consignment car"""
-        car = attrs.get('car')
-        if car and car.car_type != 'consignment':
-            raise serializers.ValidationError("This endpoint is only for consignment cars")
-        return attrs
+        fields = ["id", "amount", "description", "images", "image_files", "created"]
+        read_only_fields = ["id", "created", "images"]
     
     def create(self, validated_data):
         # Extract image files
@@ -602,6 +595,9 @@ class ConsignmentCarExpenseSerializer(serializers.ModelSerializer):
         
         # Set investor as the show room owner (who is adding the expense)
         validated_data['investor'] = self.context['request'].user
+        
+        # Car will be set by the view (passed from URL parameter)
+        # No need to validate car type here since the view already handles it
         
         # Create the expense
         expense = super().create(validated_data)
