@@ -10,20 +10,48 @@ from django.conf import settings
 class Car(TimeStampedModel):
     """
     Car details added by Admin or Show Room Owner
+    Supports both investor-funded cars and consignment cars
     """
+    CAR_TYPE_CHOICES = [
+        ('investment', 'Investment Car'),
+        ('consignment', 'Consignment Car'),
+    ]
+    
     # Basic Information
     brand = models.CharField(max_length=150)         # e.g. Toyota, Honda, BMW
     model_name = models.CharField(max_length=150)    # e.g. Civic, Corolla
     car_number = models.CharField(max_length=100, null=True)  # Registration / Plate number
     year = models.PositiveIntegerField(null=True, blank=True)   # Manufacturing year
-    asking_price = models.PositiveIntegerField(null=True, blank=True) 
+    
+    # Car type - determines business model
+    car_type = models.CharField(
+        max_length=20, 
+        choices=CAR_TYPE_CHOICES, 
+        default='investment',
+        help_text="Investment: funded by investors, Consignment: owned by seller"
+    )
+    
+    # For consignment cars
+    asking_price = models.DecimalField(
+        max_digits=15, decimal_places=2, null=True, blank=True,
+        help_text="Asking price for consignment cars"
+    )
+    car_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='owned_consignment_cars',
+        help_text="Owner of the consignment car (seller)"
+    )
+    
     # Show room owner who added this car
     show_room_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='owned_cars',
+        related_name='managed_cars',
         help_text="Show room owner who manages this car"
     )
 
@@ -101,13 +129,20 @@ class Car(TimeStampedModel):
 
     @property
     def profit(self):
-        """Calculate profit if car is sold (based on total cost basis: investment + expenses)"""
-        if self.sold_amount:
-            # Total cost basis = original investment + all expenses
+        """Calculate profit if car is sold (based on car type)"""
+        if not self.sold_amount:
+            return Decimal('0.00')
+            
+        if self.car_type == 'consignment':
+            # For consignment cars: profit = sold_amount - asking_price - show_room_expenses
+            show_room_expenses = self.get_show_room_expenses()
+            profit = self.sold_amount - (self.asking_price or 0) - show_room_expenses
+            return round(profit, 2)
+        else:
+            # For investment cars: original logic
             total_cost_basis = self.total_invested_with_expenses
             profit = self.sold_amount - total_cost_basis
             return round(profit, 2)
-        return Decimal('0.00')
 
     def get_expense_statistics(self):
         """Get detailed expense statistics"""
@@ -136,24 +171,41 @@ class Car(TimeStampedModel):
         
         return stats
 
+    def get_show_room_expenses(self):
+        """Get total expenses added by show room owner for consignment cars"""
+        if self.car_type == 'consignment':
+            show_room_expenses = self.expenses.filter(investor=self.show_room_owner)
+            return sum(exp.amount for exp in show_room_expenses)
+        return Decimal('0.00')
+
     def calculate_profit_distribution(self):
         """
-        Calculate profit distribution among admin and investors
-        Logic: Admin takes percentage of total profit first, then remaining profit is distributed 
-        among investors based on their contribution percentage to total cost basis
+        Calculate profit distribution based on car type
+        - Investment cars: distributed among admin and investors
+        - Consignment cars: distributed between show room owner and car owner
         """
         if not self.sold_amount:
             return {
                 "admin_share": Decimal('0.00'), 
-                "investor_shares": {},
+                "investor_shares": {} if self.car_type == 'investment' else None,
+                "show_room_owner_share": Decimal('0.00') if self.car_type == 'consignment' else None,
+                "car_owner_share": Decimal('0.00') if self.car_type == 'consignment' else None,
                 "total_profit": Decimal('0.00'),
                 "remaining_profit": Decimal('0.00'),
-                "total_cost_basis": round(self.total_invested_with_expenses, 2),
+                "car_type": self.car_type,
                 "error": "Car has not been sold yet"
             }
         
-        total_cost_basis = self.total_invested_with_expenses
         total_profit = round(self.profit, 2)
+        
+        if self.car_type == 'consignment':
+            return self._calculate_consignment_profit_distribution(total_profit)
+        else:
+            return self._calculate_investment_profit_distribution(total_profit)
+
+    def _calculate_investment_profit_distribution(self, total_profit):
+        """Calculate profit distribution for investment cars"""
+        total_cost_basis = self.total_invested_with_expenses
         
         if total_profit <= 0:
             return {
@@ -162,6 +214,7 @@ class Car(TimeStampedModel):
                 "total_profit": total_profit,
                 "remaining_profit": Decimal('0.00'),
                 "total_cost_basis": round(total_cost_basis, 2),
+                "car_type": "investment",
                 "error": f"No profit to distribute. Loss: {abs(total_profit)}"
             }
 
@@ -170,13 +223,10 @@ class Car(TimeStampedModel):
         remaining_profit = round(total_profit - admin_share, 2)
 
         # Step 2: Calculate investor shares based on their contribution percentage to total cost basis
-        # Each investor's share = (their_contribution / total_cost_basis) * remaining_profit
         investor_shares = {}
-
         for investment in self.investments.all():
             investor_contribution = investment.total_contribution
             if total_cost_basis > 0:
-                # Percentage based on contribution to total cost basis
                 contribution_percentage = investor_contribution / total_cost_basis
                 investor_profit = round(remaining_profit * contribution_percentage, 2)
             else:
@@ -196,7 +246,40 @@ class Car(TimeStampedModel):
             "total_profit": total_profit,
             "remaining_profit": remaining_profit,
             "total_cost_basis": round(total_cost_basis, 2),
-            "sold_amount": round(self.sold_amount, 2)
+            "sold_amount": round(self.sold_amount, 2),
+            "car_type": "investment"
+        }
+
+    def _calculate_consignment_profit_distribution(self, total_profit):
+        """Calculate profit distribution for consignment cars"""
+        if total_profit <= 0:
+            return {
+                "show_room_owner_share": Decimal('0.00'),
+                "car_owner_share": Decimal('0.00'),
+                "total_profit": total_profit,
+                "asking_price": round(self.asking_price or 0, 2),
+                "show_room_expenses": round(self.get_show_room_expenses(), 2),
+                "sold_amount": round(self.sold_amount, 2),
+                "car_type": "consignment",
+                "error": f"No profit to distribute. Loss: {abs(total_profit)}"
+            }
+
+        # For consignment cars: show room owner gets percentage, car owner gets the rest
+        show_room_owner_share = round((self.admin_percentage / Decimal('100')) * total_profit, 2)
+        car_owner_share = round(total_profit - show_room_owner_share, 2)
+        
+        # Car owner also gets back the asking price minus show room expenses
+        car_owner_total = round((self.asking_price or 0) + car_owner_share, 2)
+
+        return {
+            "show_room_owner_share": show_room_owner_share,
+            "car_owner_share": car_owner_share,
+            "car_owner_total_return": car_owner_total,
+            "total_profit": total_profit,
+            "asking_price": round(self.asking_price or 0, 2),
+            "show_room_expenses": round(self.get_show_room_expenses(), 2),
+            "sold_amount": round(self.sold_amount, 2),
+            "car_type": "consignment"
         }
 
 
@@ -261,13 +344,18 @@ class CarInvestment(TimeStampedModel):
 
 class CarExpense(TimeStampedModel):
     """
-    Car expenses added by investors
+    Car expenses added by investors or show room owners
+    For investment cars: added by investors
+    For consignment cars: added by show room owners
     """
     car = models.ForeignKey(
         Car, related_name="expenses", on_delete=models.CASCADE
     )
     investor = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="car_expenses", on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL, 
+        related_name="car_expenses", 
+        on_delete=models.CASCADE,
+        help_text="For investment cars: investor who paid. For consignment cars: show room owner"
     )
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     description = models.TextField(help_text="Expense details like maintenance, repairs, etc.")
@@ -276,7 +364,14 @@ class CarExpense(TimeStampedModel):
         ordering = ['-created']
 
     def __str__(self):
-        return f"{self.investor.email} - {self.amount} expense for {self.car.model_name}"
+        expense_type = "Show Room Expense" if self.car.car_type == 'consignment' and self.investor == self.car.show_room_owner else "Investor Expense"
+        return f"{expense_type}: {self.investor.email} - {self.amount} for {self.car.model_name}"
+    
+    @property
+    def is_show_room_expense(self):
+        """Check if this is a show room owner expense for a consignment car"""
+        return (self.car.car_type == 'consignment' and 
+                self.investor == self.car.show_room_owner)
 
 
 class CarExpenseImage(TimeStampedModel):

@@ -1,5 +1,9 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from show_room.models import Car, CarInvestment, CarExpense, CarExpenseImage
+
+User = get_user_model()
 
 
 class CarInvestmentCreateSerializer(serializers.ModelSerializer):
@@ -93,23 +97,40 @@ class CarExpenseSerializer(serializers.ModelSerializer):
 
 
 class CarListSerializer(serializers.ModelSerializer):
-    """Serializer for car list view (home page) - minimal details"""
-    total_invested = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
-    remaining_amount = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    """Serializer for car list view (home page) - minimal details for both car types"""
+    total_invested = serializers.SerializerMethodField(read_only=True)
+    remaining_amount = serializers.SerializerMethodField(read_only=True)
     investor_count = serializers.SerializerMethodField(read_only=True)
+    car_owner_name = serializers.SerializerMethodField(read_only=True)
+    show_room_expenses = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Car
         fields = [
-            "id",
+            "id", "car_type",
             "brand", "model_name", "car_number", "year", "color",
             "fuel_type", "transmission", "status",
-            "total_amount", "total_invested", "remaining_amount",
-            "investor_count","asking_price"
+            "total_amount", "asking_price", "total_invested", "remaining_amount",
+            "investor_count", "car_owner_name", "show_room_expenses"
         ]
     
+    def get_total_invested(self, obj):
+        """Get total invested based on car type"""
+        if obj.car_type == 'consignment':
+            return "0.00"  # No investments for consignment cars
+        return f"{obj.total_invested:.2f}"
+    
+    def get_remaining_amount(self, obj):
+        """Get remaining amount based on car type"""
+        if obj.car_type == 'consignment':
+            return "0.00"  # No remaining amount for consignment cars
+        return f"{obj.remaining_amount:.2f}"
+    
     def get_investor_count(self, obj):
-        """Get number of investors for this car"""
+        """Get number of investors for investment cars"""
+        if obj.car_type == 'consignment':
+            return 0  # No investors for consignment cars
+            
         user = self.context['request'].user if 'request' in self.context else None
         
         if user and user.is_superuser:
@@ -117,38 +138,70 @@ class CarListSerializer(serializers.ModelSerializer):
             return obj.investments.count()
         else:
             # Regular users just see if they are invested (1 or 0)
-            return 1 if obj.investments.filter(investor=user).exists() else 0
+            return obj.investments.count()
+    
+    def get_car_owner_name(self, obj):
+        """Get car owner name for consignment cars"""
+        if obj.car_type == 'consignment' and obj.car_owner:
+            name = f"{obj.car_owner.first_name} {obj.car_owner.last_name}".strip()
+            return name if name else obj.car_owner.email
+        return None
+    
+    def get_show_room_expenses(self, obj):
+        """Get show room expenses for consignment cars"""
+        if obj.car_type == 'consignment':
+            return f"{obj.get_show_room_expenses():.2f}"
+        return "0.00"
 
 
 class CarDetailSerializer(serializers.ModelSerializer):
-    """Serializer for car detail view - complete details"""
-    # For creating
+    """Serializer for car detail view - handles both investment and consignment cars"""
+    # For creating investment cars
     investments = CarInvestmentCreateSerializer(many=True, write_only=True, required=False)
 
-    # For response
+    # Common fields for both car types
     all_investments = serializers.SerializerMethodField(read_only=True)
     all_expenses = serializers.SerializerMethodField(read_only=True)
     expense_summary = serializers.SerializerMethodField(read_only=True)
     expense_analytics = serializers.SerializerMethodField(read_only=True)
-    total_invested = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
-    total_expenses = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
-    total_invested_with_expenses = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
-    remaining_amount = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
     profit = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
     profit_distribution = serializers.SerializerMethodField(read_only=True)
+    
+    # Investment car specific fields
+    total_invested = serializers.SerializerMethodField(read_only=True)
+    total_expenses = serializers.SerializerMethodField(read_only=True)
+    total_invested_with_expenses = serializers.SerializerMethodField(read_only=True)
+    remaining_amount = serializers.SerializerMethodField(read_only=True)
+    
+    # Consignment car specific fields
+    car_owner_email = serializers.CharField(source='car_owner.email', read_only=True)
+    car_owner_name = serializers.SerializerMethodField(read_only=True)
+    car_owner_phone = serializers.CharField(source='car_owner.phone_number', read_only=True)
+    show_room_owner_email = serializers.CharField(source='show_room_owner.email', read_only=True)
+    show_room_expenses = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Car
         fields = [
-            "id",
+            "id", "car_type",
             "brand", "model_name", "car_number", "year", "color",
             "engine_capacity", "fuel_type", "transmission", "mileage", "status",
-            "total_amount", "sold_amount", "admin_percentage",
+            "total_amount", "asking_price", "sold_amount", "admin_percentage",
+            
+            # Investment car fields
             "total_invested", "total_expenses", "total_invested_with_expenses", 
-            "remaining_amount", "profit",'asking_price',
-            "investments", "all_investments", "all_expenses", "expense_summary", "expense_analytics", "profit_distribution",
+            "remaining_amount", "investments", "all_investments",
+            
+            # Consignment car fields
+            "car_owner", "car_owner_email", "car_owner_name", "car_owner_phone",
+            "show_room_owner", "show_room_owner_email", "show_room_expenses",
+            
+            # Common fields
+            "all_expenses", "expense_summary", "expense_analytics", 
+            "profit", "profit_distribution", "created", "modified"
         ]
 
+    @transaction.atomic
     def create(self, validated_data):
         investments_data = validated_data.pop("investments", [])
         
@@ -157,21 +210,39 @@ class CarDetailSerializer(serializers.ModelSerializer):
         if user.role == 'show_room_owner':
             validated_data['show_room_owner'] = user
         
+        # ✅ Validate investments BEFORE creating the car
+        if investments_data:
+            total_investments = sum(inv["amount"] for inv in investments_data)
+            car_total_amount = validated_data.get('total_amount', 0)
+            
+            if total_investments != car_total_amount:
+                raise serializers.ValidationError(
+                    f"Total investments ({total_investments}) must equal car total amount ({car_total_amount})."
+                )
+        
+        # Now create the car (only after validation passes)
         car = Car.objects.create(**validated_data)
 
-        total_investments = sum(inv["amount"] for inv in investments_data)
-
-        # ✅ Validate total amount first
-        if total_investments != car.total_amount:
-            raise serializers.ValidationError(
-                f"Total investments ({total_investments}) must equal car total amount ({car.total_amount})."
-            )
-
-        # ✅ Now create investments
+        # Create investments
         for inv in investments_data:
-            CarInvestment.objects.create(car=car, **inv)
-
+            CarInvestment.objects
         return car
+
+    def validate(self, attrs):
+        """Validate the entire serializer data"""
+        investments_data = attrs.get("investments", [])
+        total_amount = attrs.get("total_amount")
+        
+        # Only validate investments for investment cars (not consignment cars)
+        if investments_data and total_amount:
+            total_investments = sum(inv["amount"] for inv in investments_data)
+            
+            if total_investments != total_amount:
+                raise serializers.ValidationError({
+                    "investments": f"Total investments ({total_investments}) must equal car total amount ({total_amount})."
+                })
+        
+        return attrs
 
     def update(self, instance, validated_data):
         investments_data = validated_data.pop("investments", None)
@@ -257,8 +328,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
             # Show room owners see expenses for their cars
             expenses = obj.expenses.all()
         elif user:
-            # Regular users see all expenses for cars they invested in
-            # (since they can only access cars they invested in anyway)
+            # Regular users see all expenses for cars they invested in or own
             expenses = obj.expenses.all()
         else:
             expenses = []
@@ -271,6 +341,8 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 "investor_name": f"{exp.investor.first_name} {exp.investor.last_name}".strip() or exp.investor.email,
                 "amount": f"{exp.amount:.2f}",
                 "description": exp.description,
+                "is_show_room_expense": exp.is_show_room_expense if obj.car_type == 'consignment' else False,
+                "expense_type": "Show Room Expense" if (obj.car_type == 'consignment' and exp.investor == obj.show_room_owner) else "Investor Expense",
                 "images": [
                     {
                         "id": img.id,
@@ -405,12 +477,144 @@ class CarDetailSerializer(serializers.ModelSerializer):
             },
             'expense_percentage_of_investment': f"{expense_percentage:.2f}"
         }
+    
+    def get_total_invested(self, obj):
+        """Get total invested - only for investment cars"""
+        if obj.car_type == 'investment':
+            return f"{obj.total_invested:.2f}"
+        return "0.00"
+    
+    def get_total_expenses(self, obj):
+        """Get total expenses based on car type"""
+        if obj.car_type == 'investment':
+            return f"{obj.total_expenses:.2f}"
+        else:  # consignment
+            return f"{obj.get_show_room_expenses():.2f}"
+    
+    def get_total_invested_with_expenses(self, obj):
+        """Get total invested with expenses - only for investment cars"""
+        if obj.car_type == 'investment':
+            return f"{obj.total_invested_with_expenses:.2f}"
+        return "0.00"
+    
+    def get_remaining_amount(self, obj):
+        """Get remaining amount - only for investment cars"""
+        if obj.car_type == 'investment':
+            return f"{obj.remaining_amount:.2f}"
+        return "0.00"
+    
+    def get_car_owner_name(self, obj):
+        """Get formatted car owner name for consignment cars"""
+        if obj.car_type == 'consignment' and obj.car_owner:
+            name = f"{obj.car_owner.first_name} {obj.car_owner.last_name}".strip()
+            return name if name else obj.car_owner.email
+        return None
+    
+    def get_show_room_expenses(self, obj):
+        """Get total show room expenses for consignment cars"""
+        if obj.car_type == 'consignment':
+            return f"{obj.get_show_room_expenses():.2f}"
+        return "0.00"
 
     def get_profit_distribution(self, obj):
-        """Get profit distribution if car is sold"""
+        """Get profit distribution if car is sold - works for both car types"""
         if obj.sold_amount:
             return obj.calculate_profit_distribution()
         return None
+
+
+class ConsignmentCarCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating consignment cars"""
+    
+    class Meta:
+        model = Car
+        fields = [
+            "brand", "model_name", "car_number", "year", "color",
+            "engine_capacity", "fuel_type", "transmission", "mileage",
+            "asking_price", "admin_percentage", "car_owner"
+        ]
+    
+    def validate_asking_price(self, value):
+        """Validate asking price is provided for consignment cars"""
+        if not value or value <= 0:
+            raise serializers.ValidationError("Asking price is required and must be greater than 0")
+        return value
+    
+    def validate_car_owner(self, value):
+        """Validate that the car owner exists and is accessible to the show room owner"""
+        if not value:
+            raise serializers.ValidationError("Car owner is required")
+        
+        # Check if the car owner exists
+        if not User.objects.filter(id=value.id).exists():
+            raise serializers.ValidationError("Car owner does not exist")
+        
+        # Check if the car owner is managed by the current show room owner or is accessible
+        current_user = self.context['request'].user
+        if not (current_user.is_superuser or 
+                value.show_room_owner == current_user or
+                value.show_room_owner is None):
+            raise serializers.ValidationError("You can only create consignment cars for users you manage")
+        
+        return value
+    
+    def create(self, validated_data):
+        # Set car type and relationships
+        validated_data['car_type'] = 'consignment'
+        validated_data['show_room_owner'] = self.context['request'].user
+        validated_data['total_amount'] = validated_data['asking_price']  # For consistency
+        
+        # If car owner doesn't have a show room owner, assign current user
+        car_owner = validated_data['car_owner']
+        if not car_owner.show_room_owner:
+            car_owner.show_room_owner = self.context['request'].user
+            car_owner.save()
+        
+        return Car.objects.create(**validated_data)
+
+
+
+class ConsignmentCarExpenseSerializer(serializers.ModelSerializer):
+    """Serializer for adding expenses to consignment cars (show room owner only)"""
+    images = CarExpenseImageSerializer(many=True, read_only=True)
+    image_files = serializers.ListField(
+        child=serializers.ImageField(),
+        write_only=True,
+        required=False,
+        help_text="List of image files to upload with the expense"
+    )
+    
+    class Meta:
+        model = CarExpense
+        fields = ["id", "car", "amount", "description", "images", "image_files", "created"]
+        read_only_fields = ["created"]
+    
+    def validate(self, attrs):
+        """Validate that this is for a consignment car"""
+        car = attrs.get('car')
+        if car and car.car_type != 'consignment':
+            raise serializers.ValidationError("This endpoint is only for consignment cars")
+        return attrs
+    
+    def create(self, validated_data):
+        # Extract image files
+        image_files = validated_data.pop('image_files', [])
+        
+        # Set investor as the show room owner (who is adding the expense)
+        validated_data['investor'] = self.context['request'].user
+        
+        # Create the expense
+        expense = super().create(validated_data)
+        
+        # Create images for the expense
+        for image_file in image_files:
+            CarExpenseImage.objects.create(
+                expense=expense,
+                image=image_file,
+                description=""
+            )
+        
+        return expense
 
 
 # Backward compatibility - keep the original name

@@ -5,7 +5,10 @@ from rest_framework.views import APIView
 from django.db.models import Q, Count
 from django.contrib.auth import get_user_model
 from show_room.models import Car, CarExpense, CarExpenseImage, CarInvestment
-from .serializers import CarListSerializer, CarDetailSerializer, CarExpenseSerializer, CarExpenseImageSerializer
+from .serializers import (
+    CarListSerializer, CarDetailSerializer, CarExpenseSerializer, CarExpenseImageSerializer,
+    ConsignmentCarCreateSerializer, ConsignmentCarExpenseSerializer
+)
 from auths.api.permissions import CarPermission, ExpensePermission, IsSuperAdmin, IsAdminOrShowRoomOwner
 
 User = get_user_model()
@@ -15,9 +18,11 @@ class CarViewSet(viewsets.ModelViewSet):
     permission_classes = [CarPermission]
     
     def get_serializer_class(self):
-        """Return different serializers for list and detail views"""
+        """Return different serializers based on action"""
         if self.action == 'list':
             return CarListSerializer
+        elif self.action == 'create_consignment_car':
+            return ConsignmentCarCreateSerializer
         return CarDetailSerializer
 
     def get_queryset(self):
@@ -25,24 +30,33 @@ class CarViewSet(viewsets.ModelViewSet):
         user = self.request.user
         
         if user.is_superuser or user.role == 'admin':
-            # Superusers and admins see all cars
+            # Superusers and admins see all cars (both investment and consignment)
             base_queryset = Car.objects.all()
         elif user.role == 'show_room_owner':
-            # Show room owners see only their own cars
+            # Show room owners see cars they manage (both types)
             base_queryset = Car.objects.filter(show_room_owner=user)
         else:
-            # Regular users only see cars they have invested in
+            # Regular users see:
+            # 1. Investment cars they have invested in
+            # 2. Consignment cars they own
             base_queryset = Car.objects.filter(
-                investments__investor=user
+                Q(investments__investor=user) |  # Investment cars they invested in
+                Q(car_owner=user)  # Consignment cars they own
             ).distinct()
+        
+        # Optional filtering by car_type
+        car_type = self.request.query_params.get('car_type')
+        if car_type in ['investment', 'consignment']:
+            base_queryset = base_queryset.filter(car_type=car_type)
         
         if self.action == 'list':
             # For list view, we don't need expenses data
-            return base_queryset.prefetch_related("investments__investor")
+            return base_queryset.prefetch_related("investments__investor", "car_owner")
         return base_queryset.prefetch_related(
             "investments__investor", 
             "expenses__investor", 
-            "expenses__images"
+            "expenses__images",
+            "car_owner"
         )
 
     @action(detail=True, methods=['post'], permission_classes=[ExpensePermission])
@@ -65,7 +79,7 @@ class CarViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def profit_calculation(self, request, pk=None):
-        """Get detailed profit calculation for a car"""
+        """Get detailed profit calculation for a car (works for both investment and consignment cars)"""
         car = self.get_object()
         
         if not car.sold_amount:
@@ -257,6 +271,51 @@ class CarViewSet(viewsets.ModelViewSet):
                 'investments': updated_investments,
                 'car_total_invested': float(car.total_invested)
             }, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
+    def create_consignment_car(self, request):
+        """
+        Create a new consignment car where show room owner manages a car for a seller
+        """
+        if request.user.role != 'show_room_owner' and not request.user.is_superuser:
+            return Response(
+                {"error": "Only show room owners can create consignment cars"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ConsignmentCarCreateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            car = serializer.save()
+            response_serializer = CarDetailSerializer(car, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
+    def add_consignment_expense(self, request, pk=None):
+        """
+        Add expense to a consignment car (show room owner only)
+        """
+        car = self.get_object()
+        
+        if car.car_type != 'consignment':
+            return Response(
+                {"error": "This endpoint is only for consignment cars"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if request.user.role != 'show_room_owner' or car.show_room_owner != request.user:
+            return Response(
+                {"error": "Only the managing show room owner can add expenses to consignment cars"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ConsignmentCarExpenseSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            expense = serializer.save(car=car)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class CarExpenseViewSet(viewsets.ModelViewSet):
