@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Count
 from django.contrib.auth import get_user_model
+from datetime import datetime
+from django.core.paginator import Paginator
 from show_room.models import Car, CarExpense, CarExpenseImage, CarInvestment
 from .serializers import (
     CarListSerializer, CarDetailSerializer, CarExpenseSerializer, CarExpenseImageSerializer,
@@ -271,6 +273,182 @@ class CarViewSet(viewsets.ModelViewSet):
                 'investments': updated_investments,
                 'car_total_invested': float(car.total_invested)
             }, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAdminOrShowRoomOwner])
+    def show_room_earnings_stats(self, request):
+        """
+        Get show room earnings statistics with date range filtering and pagination
+        Only for show room owners and admins
+        """
+        from datetime import datetime
+        from django.core.paginator import Paginator
+        from django.db.models import Q
+        
+        user = request.user
+        
+        # Debug: Print user info
+        print(f"User requesting earnings stats: {user.email}, Role: {user.role}, ID: {user.id}")
+        
+        # Only show room owners can access their own stats, admins can see all
+        if user.role == 'show_room_owner':
+            cars_queryset = Car.objects.filter(show_room_owner=user)
+            print(f"Show room owner filtering: Found {cars_queryset.count()} cars for user {user.id}")
+        elif user.is_superuser or user.role == 'admin':
+            # For admins, optionally filter by show_room_owner_id
+            show_room_owner_id = request.query_params.get('show_room_owner_id')
+            if show_room_owner_id:
+                try:
+                    show_room_owner = User.objects.get(id=show_room_owner_id, role='show_room_owner')
+                    cars_queryset = Car.objects.filter(show_room_owner=show_room_owner)
+                    print(f"Admin filtering by show_room_owner_id {show_room_owner_id}: Found {cars_queryset.count()} cars")
+                except User.DoesNotExist:
+                    return Response(
+                        {"error": "Show room owner not found"}, 
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                cars_queryset = Car.objects.all()
+                print(f"Admin viewing all cars: Found {cars_queryset.count()} cars")
+        else:
+            return Response(
+                {"error": "Only show room owners and admins can access earnings stats"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Date range filtering
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if start_date:
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                cars_queryset = cars_queryset.filter(created__date__gte=start_date)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid start_date format. Use YYYY-MM-DD"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        if end_date:
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                cars_queryset = cars_queryset.filter(created__date__lte=end_date)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid end_date format. Use YYYY-MM-DD"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Filter only sold cars (where earnings are realized)
+        sold_cars = cars_queryset.filter(
+            status='sold',
+            sold_amount__isnull=False,
+            sold_amount__gt=0
+        ).order_by('-created')
+        
+        print(f"After date filtering and sold status: Found {sold_cars.count()} sold cars")
+        
+        # Debug: Print car details
+        for car in sold_cars:
+            print(f"Car ID: {car.id}, Number: {car.car_number}, Show Room Owner: {car.show_room_owner_id}, User ID: {user.id}")
+        
+        # Calculate earnings for each car
+        earnings_data = []
+        total_earnings = 0
+        
+        for car in sold_cars:
+            if car.car_type == 'investment':
+                # For investment cars: admin gets percentage of profit
+                profit = car.profit
+                if profit > 0:
+                    earning = (car.admin_percentage / 100) * profit
+                else:
+                    earning = 0
+                    
+                earnings_data.append({
+                    'car_id': car.id,
+                    'car_number': car.car_number,
+                    'brand': car.brand,
+                    'model_name': car.model_name,
+                    'car_type': car.car_type,
+                    'total_amount': f"{car.total_amount:.2f}",
+                    'sold_amount': f"{car.sold_amount:.2f}",
+                    'admin_percentage': f"{car.admin_percentage:.2f}",
+                    'profit': f"{profit:.2f}",
+                    'earning_from_car': f"{earning:.2f}",
+                    'sold_date': car.modified.strftime("%Y-%m-%d"),
+                    'calculation_method': 'percentage_of_profit'
+                })
+                
+            elif car.car_type == 'consignment':
+                # For consignment cars: show room gets percentage of sold amount + expenses recovered
+                percentage_amount = (car.admin_percentage / 100) * car.sold_amount
+                show_room_expenses = car.get_show_room_expenses()
+                total_earning = percentage_amount + show_room_expenses
+                
+                earnings_data.append({
+                    'car_id': car.id,
+                    'car_number': car.car_number,
+                    'brand': car.brand,
+                    'model_name': car.model_name,
+                    'car_type': car.car_type,
+                    'asking_price': f"{car.asking_price:.2f}" if car.asking_price else "0.00",
+                    'sold_amount': f"{car.sold_amount:.2f}",
+                    'admin_percentage': f"{car.admin_percentage:.2f}",
+                    'percentage_amount': f"{percentage_amount:.2f}",
+                    'show_room_expenses': f"{show_room_expenses:.2f}",
+                    'earning_from_car': f"{total_earning:.2f}",
+                    'sold_date': car.modified.strftime("%Y-%m-%d"),
+                    'calculation_method': 'percentage_plus_expenses'
+                })
+                earning = total_earning
+            
+            total_earnings += earning
+        
+        # Pagination
+        page_size = int(request.query_params.get('page_size', 10))
+        page_number = int(request.query_params.get('page', 1))
+        
+        paginator = Paginator(earnings_data, page_size)
+        page_obj = paginator.get_page(page_number)
+        
+        # Summary statistics
+        summary = {
+            'show_room_owner': {
+                'id': user.id,
+                'email': user.email,
+                'name': f"{user.first_name or ''} {user.last_name or ''}".strip() or user.email,
+                'show_room_name': user.show_room_name
+            } if user.role == 'show_room_owner' else None,
+            'total_sold_cars': sold_cars.count(),
+            'total_earnings': f"{total_earnings:.2f}",
+            'date_range': {
+                'start_date': start_date.strftime('%Y-%m-%d') if start_date else None,
+                'end_date': end_date.strftime('%Y-%m-%d') if end_date else None
+            },
+            'car_type_breakdown': {
+                'investment_cars': sold_cars.filter(car_type='investment').count(),
+                'consignment_cars': sold_cars.filter(car_type='consignment').count()
+            }
+        }
+        
+        # Response data
+        response_data = {
+            'summary': summary,
+            'earnings': list(page_obj),
+            'pagination': {
+                'current_page': page_obj.number,
+                'total_pages': paginator.num_pages,
+                'total_items': paginator.count,
+                'page_size': page_size,
+                'has_next': page_obj.has_next(),
+                'has_previous': page_obj.has_previous(),
+                'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+                'previous_page': page_obj.previous_page_number() if page_obj.has_previous() else None
+            }
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
     def create_consignment_car(self, request):

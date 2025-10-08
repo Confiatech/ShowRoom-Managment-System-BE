@@ -252,34 +252,24 @@ class Car(TimeStampedModel):
 
     def _calculate_consignment_profit_distribution(self, total_profit):
         """Calculate profit distribution for consignment cars"""
-        if total_profit <= 0:
-            return {
-                "show_room_owner_share": Decimal('0.00'),
-                "car_owner_share": Decimal('0.00'),
-                "total_profit": total_profit,
-                "asking_price": round(self.asking_price or 0, 2),
-                "show_room_expenses": round(self.get_show_room_expenses(), 2),
-                "sold_amount": round(self.sold_amount, 2),
-                "car_type": "consignment",
-                "error": f"No profit to distribute. Loss: {abs(total_profit)}"
-            }
-
-        # For consignment cars: show room owner gets percentage, car owner gets the rest
-        show_room_owner_share = round((self.admin_percentage / Decimal('100')) * total_profit, 2)
-        car_owner_share = round(total_profit - show_room_owner_share, 2)
+        # New logic: Show room gets percentage of sold amount + expenses, car owner gets the rest
+        show_room_percentage_amount = round((self.admin_percentage / Decimal('100')) * self.sold_amount, 2)
+        show_room_expenses = round(self.get_show_room_expenses(), 2)
+        show_room_total_earnings = show_room_percentage_amount + show_room_expenses
+        car_owner_earnings = round(self.sold_amount - show_room_percentage_amount - show_room_expenses, 2)
         
-        # Car owner also gets back the asking price minus show room expenses
-        car_owner_total = round((self.asking_price or 0) + car_owner_share, 2)
-
         return {
-            "show_room_owner_share": show_room_owner_share,
-            "car_owner_share": car_owner_share,
-            "car_owner_total_return": car_owner_total,
-            "total_profit": total_profit,
+            "show_room_owner_share": show_room_percentage_amount,
+            "show_room_expenses_recovered": show_room_expenses,
+            "show_room_total_earnings": show_room_total_earnings,
+            "car_owner_earnings": car_owner_earnings,
+            "show_room_percentage_amount": show_room_percentage_amount,
             "asking_price": round(self.asking_price or 0, 2),
-            "show_room_expenses": round(self.get_show_room_expenses(), 2),
+            "show_room_expenses": show_room_expenses,
             "sold_amount": round(self.sold_amount, 2),
-            "car_type": "consignment"
+            "admin_percentage": float(self.admin_percentage),
+            "car_type": "consignment",
+            "calculation_method": "show_room_gets_percentage_plus_expenses"
         }
 
 

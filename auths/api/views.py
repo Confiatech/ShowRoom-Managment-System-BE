@@ -112,7 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return User.objects.all().order_by('-date_joined').exclude(id=user.id)
         elif user.role == 'show_room_owner':
             # Show room owners can see their managed users + themselves
-            return user.get_accessible_users().order_by('-date_joined').exclude(id=user.id)
+            return user.get_accessible_users().order_by('-date_joined')
         else:
             # Regular users can only see themselves
             return User.objects.filter(id=user.id)
@@ -406,10 +406,9 @@ class UserViewSet(viewsets.ModelViewSet):
         current_user = request.user
         
         # Check if current user is a show room owner and the target user is managed by them
-        if not (current_user.role == 'show_room_owner' and 
-                user_to_reset.show_room_owner == current_user):
+        if current_user.role == 'investor' and current_user.id != user_to_reset.id:
             return Response(
-                {"error": "You can only reset passwords for users you manage"}, 
+                {"error": "You can only reset passwords for users you manage"},
                 status=status.HTTP_403_FORBIDDEN
             )
         

@@ -53,6 +53,34 @@ class UserManagementViewSet(viewsets.ModelViewSet):
         
         serializer.save()
     
+    def update(self, request, *args, **kwargs):
+        """Override update to add debugging"""
+        print("=== UPDATE METHOD CALLED ===")
+        print(f"Update request data: {request.data}")
+        print(f"Update request FILES: {request.FILES}")
+        print(f"Content-Type: {request.content_type}")
+        print(f"Method: {request.method}")
+        return super().update(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        """Override partial_update to add debugging"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info("=== PARTIAL UPDATE METHOD CALLED ===")
+        logger.info(f"Partial update request data: {request.data}")
+        logger.info(f"Partial update request FILES: {request.FILES}")
+        logger.info(f"Content-Type: {request.content_type}")
+        logger.info(f"Method: {request.method}")
+        
+        print("=== PARTIAL UPDATE METHOD CALLED ===")
+        print(f"Partial update request data: {request.data}")
+        print(f"Partial update request FILES: {request.FILES}")
+        print(f"Content-Type: {request.content_type}")
+        print(f"Method: {request.method}")
+        
+        return super().partial_update(request, *args, **kwargs)
+    
     @action(detail=False, methods=['post'], permission_classes=[UserManagementPermission])
     def create_investor(self, request):
         """Create a new investor (for show room owners)"""
@@ -77,6 +105,28 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             user = serializer.save()
             response_serializer = UserSerializer(user)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['patch'], permission_classes=[IsSuperAdmin])
+    def update_show_room_owner(self, request, pk=None):
+        """Update a show room owner (super admin only)"""
+        user = self.get_object()
+        if user.role != 'show_room_owner':
+            return Response(
+                {"error": "This endpoint is only for show room owners"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = ShowRoomOwnerCreateSerializer(
+            user, 
+            data=request.data, 
+            partial=True, 
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            user = serializer.save()
+            response_serializer = UserSerializer(user)
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=['patch'])
@@ -209,3 +259,56 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             'show_room_owners_count': len(result),
             'data': result
         })
+    
+    @action(detail=True, methods=['patch'])
+    def test_image_upload(self, request, pk=None):
+        """Test endpoint to debug image upload"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        user = self.get_object()
+        logger.info("=== TEST IMAGE UPLOAD ===")
+        logger.info(f"Request data: {request.data}")
+        logger.info(f"Request FILES: {request.FILES}")
+        logger.info(f"Content-Type: {request.content_type}")
+        
+        print("=== TEST IMAGE UPLOAD ===")
+        print(f"Request data: {request.data}")
+        print(f"Request FILES: {request.FILES}")
+        print(f"Content-Type: {request.content_type}")
+        
+        if 'image' in request.FILES:
+            image_file = request.FILES['image']
+            logger.info(f"Image file found: {image_file.name}")
+            logger.info(f"Image size: {image_file.size}")
+            logger.info(f"Image content type: {image_file.content_type}")
+            
+            print(f"Image file found: {image_file.name}")
+            print(f"Image size: {image_file.size}")
+            print(f"Image content type: {image_file.content_type}")
+            
+            # Store old image path for comparison
+            old_image = str(user.image) if user.image else "None"
+            
+            # Manually update the image
+            user.image = image_file
+            user.save()
+            
+            new_image = str(user.image) if user.image else "None"
+            
+            logger.info(f"Image updated from {old_image} to {new_image}")
+            print(f"Image updated from {old_image} to {new_image}")
+            
+            return Response({
+                'message': 'Image updated successfully',
+                'old_image': old_image,
+                'new_image': new_image,
+                'image_url': user.image.url if user.image else None
+            })
+        else:
+            return Response({
+                'error': 'No image file found in request',
+                'available_keys': list(request.data.keys()),
+                'files_keys': list(request.FILES.keys()),
+                'content_type': request.content_type
+            })

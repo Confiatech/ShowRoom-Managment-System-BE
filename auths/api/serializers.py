@@ -102,6 +102,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         style={'input_type': 'password'},
         help_text="New password (optional)"
     )
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
@@ -115,7 +116,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'address',
             'role',
             'show_room_owner',
-            'is_active'
+            'is_active',
+            'image',
+            'show_room_name'
         ]
 
     def validate_email(self, value):
@@ -132,10 +135,19 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        Update user with optional password change.
+        Update user with optional password change and image handling.
         """
         password = validated_data.pop('password', None)
         
+        # Handle image field explicitly
+        image = validated_data.pop('image', None)
+        if image is not None:
+            # Delete old image if it exists
+            if instance.image:
+                instance.image.delete(save=False)
+            instance.image = image
+        
+        # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         

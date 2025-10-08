@@ -103,6 +103,7 @@ class CarListSerializer(serializers.ModelSerializer):
     investor_count = serializers.SerializerMethodField(read_only=True)
     car_owner_name = serializers.SerializerMethodField(read_only=True)
     show_room_expenses = serializers.SerializerMethodField(read_only=True)
+    show_room_earnings = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Car
@@ -111,7 +112,7 @@ class CarListSerializer(serializers.ModelSerializer):
             "brand", "model_name", "car_number", "year", "color",
             "fuel_type", "transmission", "status",
             "total_amount", "asking_price", "total_invested", "remaining_amount",
-            "investor_count", "car_owner_name", "show_room_expenses"
+            "investor_count", "car_owner_name", "show_room_expenses", "show_room_earnings"
         ]
     
     def get_total_invested(self, obj):
@@ -152,6 +153,22 @@ class CarListSerializer(serializers.ModelSerializer):
         if obj.car_type == 'consignment':
             return f"{obj.get_show_room_expenses():.2f}"
         return "0.00"
+    
+    def get_show_room_earnings(self, obj):
+        """Calculate show room earnings for consignment cars"""
+        if obj.car_type == 'consignment' and obj.sold_amount:
+            # Show room earnings = (sold_amount * admin_percentage / 100) + show_room_expenses
+            # Show room gets their percentage plus expenses recovered
+            from decimal import Decimal
+            show_room_percentage_amount = (Decimal(str(obj.sold_amount)) * Decimal(str(obj.admin_percentage)) / Decimal('100'))
+            show_room_expenses = Decimal(str(obj.get_show_room_expenses()))
+            earnings = show_room_percentage_amount + show_room_expenses
+            return f"{earnings:.2f}"
+        elif obj.car_type == 'consignment':
+            # If not sold, show potential earnings minus current expenses
+            show_room_expenses = obj.get_show_room_expenses()
+            return f"{-show_room_expenses:.2f}"  # Negative because only expenses so far
+        return "0.00"
 
 
 class CarDetailSerializer(serializers.ModelSerializer):
@@ -164,8 +181,12 @@ class CarDetailSerializer(serializers.ModelSerializer):
     all_expenses = serializers.SerializerMethodField(read_only=True)
     expense_summary = serializers.SerializerMethodField(read_only=True)
     expense_analytics = serializers.SerializerMethodField(read_only=True)
-    profit = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    profit = serializers.SerializerMethodField(read_only=True)
     profit_distribution = serializers.SerializerMethodField(read_only=True)
+    
+    # Consignment car specific earnings
+    show_room_earnings = serializers.SerializerMethodField(read_only=True)
+    car_owner_earnings = serializers.SerializerMethodField(read_only=True)
     
     # Investment car specific fields
     total_invested = serializers.SerializerMethodField(read_only=True)
@@ -198,7 +219,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
             
             # Common fields
             "all_expenses", "expense_summary", "expense_analytics", 
-            "profit", "profit_distribution", "created", "modified"
+            "profit", "profit_distribution", "show_room_earnings", "car_owner_earnings", "created", "modified"
         ]
 
     @transaction.atomic
@@ -225,7 +246,11 @@ class CarDetailSerializer(serializers.ModelSerializer):
 
         # Create investments
         for inv in investments_data:
-            CarInvestment.objects
+            CarInvestment.objects.create(
+                car=car,
+                investor=inv["investor"],
+                amount=inv["amount"]
+            )
         return car
 
     def validate(self, attrs):
@@ -515,6 +540,40 @@ class CarDetailSerializer(serializers.ModelSerializer):
         if obj.car_type == 'consignment':
             return f"{obj.get_show_room_expenses():.2f}"
         return "0.00"
+
+    def get_profit(self, obj):
+        """Get profit - only for investment cars, null for consignment cars"""
+        if obj.car_type == 'investment':
+            return f"{obj.profit:.2f}"
+        return None
+    
+    def get_show_room_earnings(self, obj):
+        """Calculate show room earnings for consignment cars"""
+        if obj.car_type == 'consignment' and obj.sold_amount:
+            # Show room earnings = (sold_amount * admin_percentage / 100) + show_room_expenses
+            # Show room gets their percentage plus expenses recovered
+            from decimal import Decimal
+            show_room_percentage_amount = (Decimal(str(obj.sold_amount)) * Decimal(str(obj.admin_percentage)) / Decimal('100'))
+            show_room_expenses = Decimal(str(obj.get_show_room_expenses()))
+            earnings = show_room_percentage_amount + show_room_expenses
+            return f"{earnings:.2f}"
+        elif obj.car_type == 'consignment':
+            # If not sold, show potential earnings minus current expenses
+            show_room_expenses = obj.get_show_room_expenses()
+            return f"{-show_room_expenses:.2f}"  # Negative because only expenses so far
+        return None
+    
+    def get_car_owner_earnings(self, obj):
+        """Calculate car owner earnings for consignment cars"""
+        if obj.car_type == 'consignment' and obj.sold_amount:
+            # Car owner earnings = sold_amount - show_room_percentage - show_room_expenses
+            from decimal import Decimal
+            sold_amount = Decimal(str(obj.sold_amount))
+            show_room_percentage_amount = (sold_amount * Decimal(str(obj.admin_percentage)) / Decimal('100'))
+            show_room_expenses = Decimal(str(obj.get_show_room_expenses()))
+            car_owner_earnings = sold_amount - show_room_percentage_amount - show_room_expenses
+            return f"{car_owner_earnings:.2f}"
+        return None
 
     def get_profit_distribution(self, obj):
         """Get profit distribution if car is sold - works for both car types"""
