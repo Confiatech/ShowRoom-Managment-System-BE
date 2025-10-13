@@ -87,7 +87,11 @@ class CarPermission(BasePermission):
         
         # Regular users can only read cars they have invested in
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return obj.investments.filter(investor=request.user).exists()
+            query =  obj.investments.filter(investor=request.user).exists()
+            if query:
+                return query
+            else:
+                return obj.car_owner == request.user
         
         # No write permissions for regular users
         return False
@@ -149,6 +153,7 @@ class UserManagementPermission(BasePermission):
     """
 
     def has_permission(self, request, view):
+
         if not (request.user and request.user.is_authenticated):
             return False
         
@@ -159,6 +164,8 @@ class UserManagementPermission(BasePermission):
         # Show room owners can manage their investors
         if request.user.role == 'show_room_owner':
             return True
+        if request.user.role == 'investor':
+            return True
         
         # No access for regular users
         return False
@@ -166,7 +173,6 @@ class UserManagementPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if not (request.user and request.user.is_authenticated):
             return False
-        
         # Superusers can manage all users
         if request.user.is_superuser:
             return True
@@ -176,5 +182,8 @@ class UserManagementPermission(BasePermission):
             # Can manage users assigned to them or themselves
             return obj.show_room_owner == request.user or obj == request.user
         
+        if request.user.role == 'investor':
+            return obj == request.user
+            # return True
         # No access for regular users
         return False

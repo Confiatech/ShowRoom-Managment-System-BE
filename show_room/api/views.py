@@ -19,6 +19,43 @@ User = get_user_model()
 class CarViewSet(viewsets.ModelViewSet):
     permission_classes = [CarPermission]
     
+    def list(self, request, *args, **kwargs):
+        """
+        List cars with pagination support
+        """
+        from django.core.paginator import Paginator
+        
+        # Get the queryset
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Get pagination parameters
+        page_size = int(request.query_params.get('page_size', 10))
+        page_number = int(request.query_params.get('page', 1))
+        
+        # Apply pagination
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page_number)
+        
+        # Serialize the paginated data
+        serializer = self.get_serializer(page_obj, many=True)
+        
+        # Prepare response data with pagination info
+        response_data = {
+            'results': serializer.data,
+            'pagination': {
+                'current_page': page_obj.number,
+                'total_pages': paginator.num_pages,
+                'total_items': paginator.count,
+                'page_size': page_size,
+                'has_next': page_obj.has_next(),
+                'has_previous': page_obj.has_previous(),
+                'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+                'previous_page': page_obj.previous_page_number() if page_obj.has_previous() else None
+            }
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+    
     def get_serializer_class(self):
         """Return different serializers based on action"""
         if self.action == 'list':
@@ -282,17 +319,17 @@ class CarViewSet(viewsets.ModelViewSet):
         """
         from datetime import datetime
         from django.core.paginator import Paginator
-        from django.db.models import Q
+        # from django.db.models import Q
         
         user = request.user
         
         # Debug: Print user info
-        print(f"User requesting earnings stats: {user.email}, Role: {user.role}, ID: {user.id}")
+        # print(f"User requesting earnings stats: {user.email}, Role: {user.role}, ID: {user.id}")
         
         # Only show room owners can access their own stats, admins can see all
         if user.role == 'show_room_owner':
             cars_queryset = Car.objects.filter(show_room_owner=user)
-            print(f"Show room owner filtering: Found {cars_queryset.count()} cars for user {user.id}")
+            # print(f"Show room owner filtering: Found {cars_queryset.count()} cars for user {user.id}")
         elif user.is_superuser or user.role == 'admin':
             # For admins, optionally filter by show_room_owner_id
             show_room_owner_id = request.query_params.get('show_room_owner_id')
@@ -300,7 +337,7 @@ class CarViewSet(viewsets.ModelViewSet):
                 try:
                     show_room_owner = User.objects.get(id=show_room_owner_id, role='show_room_owner')
                     cars_queryset = Car.objects.filter(show_room_owner=show_room_owner)
-                    print(f"Admin filtering by show_room_owner_id {show_room_owner_id}: Found {cars_queryset.count()} cars")
+                    # print(f"Admin filtering by show_room_owner_id {show_room_owner_id}: Found {cars_queryset.count()} cars")
                 except User.DoesNotExist:
                     return Response(
                         {"error": "Show room owner not found"}, 
@@ -308,7 +345,7 @@ class CarViewSet(viewsets.ModelViewSet):
                     )
             else:
                 cars_queryset = Car.objects.all()
-                print(f"Admin viewing all cars: Found {cars_queryset.count()} cars")
+                # pri+nt(f"Admin viewing all cars: Found {cars_queryset.count()} cars")
         else:
             return Response(
                 {"error": "Only show room owners and admins can access earnings stats"}, 
@@ -346,11 +383,11 @@ class CarViewSet(viewsets.ModelViewSet):
             sold_amount__gt=0
         ).order_by('-created')
         
-        print(f"After date filtering and sold status: Found {sold_cars.count()} sold cars")
+        # print(f"After date filtering and sold status: Found {sold_cars.count()} sold cars")
         
         # Debug: Print car details
-        for car in sold_cars:
-            print(f"Car ID: {car.id}, Number: {car.car_number}, Show Room Owner: {car.show_room_owner_id}, User ID: {user.id}")
+        # for car in sold_cars:
+        #     print(f"Car ID: {car.id}, Number: {car.car_number}, Show Room Owner: {car.show_room_owner_id}, User ID: {user.id}")
         
         # Calculate earnings for each car
         earnings_data = []
