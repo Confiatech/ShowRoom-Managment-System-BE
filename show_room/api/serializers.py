@@ -95,6 +95,17 @@ class CarExpenseSerializer(serializers.ModelSerializer):
         
         return expense
 
+    def update(self, instance, validated_data):
+        # Extract image files (but don't process them here - handled in view)
+        validated_data.pop('image_files', [])
+        
+        # Update expense fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        return instance
+
 
 class CarListSerializer(serializers.ModelSerializer):
     """Serializer for car list view (home page) - minimal details for both car types"""

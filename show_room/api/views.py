@@ -575,14 +575,11 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # Check permissions
-        user = request.user
-        if not (user.is_superuser or user.role in ['admin', 'show_room_owner']):
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only admins and show room owners can create expenses")
+        # Permission check is handled by perform_create
+        self.perform_create(serializer)
         
-        # Create the expense with images
-        expense = serializer.save()
+        # Get the created expense
+        expense = serializer.instance
         
         # Return the complete expense data with images
         response_serializer = self.get_serializer(expense)
@@ -593,6 +590,62 @@ class CarExpenseViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED, 
             headers=headers
         )
+
+    def update(self, request, *args, **kwargs):
+        """Override update to handle image management (PUT)"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        # Update the expense
+        self.perform_update(serializer)
+        expense = serializer.instance
+        
+        # Handle image operations
+        self._handle_image_operations(request, expense)
+        
+        # Return updated expense with images
+        response_serializer = self.get_serializer(expense)
+        return Response(response_serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Override partial_update to handle image management (PATCH)"""
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+    def _handle_image_operations(self, request, expense):
+        """Handle adding, removing, and updating images"""
+        # 1. Remove images if images_to_remove is provided (array of image IDs)
+        images_to_remove = request.data.get('images_to_remove', [])
+        
+        # Handle both JSON array and form data list
+        if isinstance(images_to_remove, str):
+            import json
+            try:
+                images_to_remove = json.loads(images_to_remove)
+            except json.JSONDecodeError:
+                images_to_remove = []
+        elif not isinstance(images_to_remove, list):
+            images_to_remove = request.data.getlist('images_to_remove', [])
+        
+        if images_to_remove:
+            CarExpenseImage.objects.filter(
+                id__in=images_to_remove,
+                expense=expense
+            ).delete()
+        
+        # 2. Add new images if provided (using 'images' key)
+        new_images = request.FILES.getlist('images', [])
+        descriptions = request.data.getlist('descriptions', [])
+        
+        for i, image in enumerate(new_images):
+            description = descriptions[i] if i < len(descriptions) else ""
+            CarExpenseImage.objects.create(
+                expense=expense,
+                image=image,
+                description=description
+            )
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminOrShowRoomOwner])
     def add_images(self, request, pk=None):
