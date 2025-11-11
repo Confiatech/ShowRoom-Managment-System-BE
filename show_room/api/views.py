@@ -1,3 +1,7 @@
+import json
+
+from django.http import QueryDict
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,6 +22,49 @@ User = get_user_model()
 
 class CarViewSet(viewsets.ModelViewSet):
     permission_classes = [CarPermission]
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to parse investments JSON string from form-data"""
+      
+        
+        # Create a mutable copy of the data
+        if isinstance(request.data, QueryDict):
+            data = request.data.copy()
+        else:
+            data = dict(request.data)
+        
+        # Parse investments if it's a string (from form-data)
+        if 'investments' in data:
+            investments_value = data.get('investments')
+            print("investments_value", investments_value)
+            
+            if isinstance(investments_value, str):
+                try:
+                    parsed_investments = json.loads(investments_value)
+                    data['investments'] = parsed_investments
+                except (json.JSONDecodeError, ValueError) as e:
+                    return Response(
+                        {'investments': [f'Invalid JSON format: {str(e)}']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                parsed_investments = []
+        
+        # Create serializer with parsed data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Create investments
+        for inv in parsed_investments:
+            CarInvestment.objects.create(
+                car=serializer.instance,
+                investor=User.objects.get(id=inv["investor"]),
+                amount=inv["amount"]
+            )
+            
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def list(self, request, *args, **kwargs):
         """

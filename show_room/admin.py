@@ -67,7 +67,7 @@ class CarAdmin(admin.ModelAdmin):
     """Enhanced Car admin with better organization and visual improvements"""
     
     list_display = (
-        "car_info", "status_badge", "financial_summary", "show_room_owner",
+        "car_info", "status_badge", "document_status", "financial_summary", "show_room_owner",
         "investment_progress", "profit_status", "view_actions"
     )
     list_filter = ("status", "fuel_type", "transmission", "brand", "year")
@@ -77,6 +77,10 @@ class CarAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': (('brand', 'model_name'), ('car_number', 'year'), ('color', 'status'))
+        }),
+        ('Document Image', {
+            'fields': ('image', 'document_image_preview'),
+            'description': 'Upload car document, deal papers, or other related images (optional)'
         }),
         ('Specifications', {
             'fields': (('engine_capacity', 'fuel_type'), ('transmission', 'mileage')),
@@ -98,7 +102,7 @@ class CarAdmin(admin.ModelAdmin):
     
     readonly_fields = (
         "total_invested", "total_expenses", "total_invested_with_expenses", 
-        "remaining_amount", "profit"
+        "remaining_amount", "profit", "document_image_preview"
     )
     
     inlines = [CarInvestmentInline, CarExpenseInline]
@@ -176,6 +180,35 @@ class CarAdmin(admin.ModelAdmin):
             reverse('admin:show_room_car_change', args=[obj.pk])
         )
     view_actions.short_description = 'Actions'
+    
+    def document_status(self, obj):
+        """Display document image status"""
+        if obj.image:
+            return format_html(
+                '<span style="color: #28a745; font-weight: bold;">📄 ✓</span>'
+            )
+        return format_html('<span style="color: #6c757d;">—</span>')
+    document_status.short_description = 'Doc'
+    
+    def document_image_preview(self, obj):
+        """Display document image preview"""
+        if obj.image:
+            return format_html(
+                '<div style="margin: 10px 0;">'
+                '<img src="{}" style="max-width: 400px; max-height: 400px; '
+                'border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />'
+                '<br><small style="color: #666;">Car Document Image</small>'
+                '</div>',
+                obj.image.url
+            )
+        return format_html(
+            '<div style="padding: 20px; background: #f8f9fa; border: 1px dashed #dee2e6; '
+            'border-radius: 4px; text-align: center; color: #6c757d;">'
+            '<p style="margin: 0;">📄 No document image uploaded</p>'
+            '<small>Upload car documents, deal papers, or related images</small>'
+            '</div>'
+        )
+    document_image_preview.short_description = 'Document Preview'
 
 
 @admin.register(CarInvestment)

@@ -22,7 +22,12 @@ class Car(TimeStampedModel):
     model_name = models.CharField(max_length=150)    # e.g. Civic, Corolla
     car_number = models.CharField(max_length=100, null=True)  # Registration / Plate number
     year = models.PositiveIntegerField(null=True, blank=True)   # Manufacturing year
-    
+    image = models.ImageField(
+        upload_to='car_document_image/',
+        null=True,
+        blank=True,
+        help_text="Upload an image of the car document"
+    )
     # Car type - determines business model
     car_type = models.CharField(
         max_length=20, 

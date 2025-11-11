@@ -215,7 +215,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = [
-            "id", "car_type",
+            "id", "car_type", "image",
             "brand", "model_name", "car_number", "year", "color",
             "engine_capacity", "fuel_type", "transmission", "mileage", "status",
             "total_amount", "asking_price", "sold_amount", "admin_percentage",
@@ -242,7 +242,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
         if user.role == 'show_room_owner':
             validated_data['show_room_owner'] = user
         
-        # ✅ Validate investments BEFORE creating the car
+        # Validate investments BEFORE creating the car
         if investments_data:
             total_investments = sum(inv["amount"] for inv in investments_data)
             car_total_amount = validated_data.get('total_amount', 0)
@@ -252,7 +252,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                     f"Total investments ({total_investments}) must equal car total amount ({car_total_amount})."
                 )
         
-        # Now create the car (only after validation passes)
+        # Create the car
         car = Car.objects.create(**validated_data)
 
         # Create investments
@@ -262,6 +262,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
                 investor=inv["investor"],
                 amount=inv["amount"]
             )
+        
         return car
 
     def validate(self, attrs):
@@ -599,7 +600,7 @@ class ConsignmentCarCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = [
-            "brand", "model_name", "car_number", "year", "color",
+            "image", "brand", "model_name", "car_number", "year", "color",
             "engine_capacity", "fuel_type", "transmission", "mileage",
             "asking_price", "admin_percentage", "car_owner"
         ]
